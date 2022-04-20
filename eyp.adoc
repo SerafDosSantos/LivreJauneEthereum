@@ -1,0 +1,5423 @@
+== ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER
+
+____
+*BERLIN VERSION 630ed56 – 2022-02-13*
+
+DR. GAVIN WOOD FOUNDER, ETHEREUM & PARITY
+
+GAVIN@PARITY.IO
+
+Abstract. The blockchain paradigm when coupled with cryptographically-secured transactions has demonstrated its utility through a number of projects, with Bitcoin being one of the most notable ones. Each such project can be seen as a simple application on a decentralised, but singleton, compute resource. We can call this paradigm a transactional singleton machine with shared-state.
+
+Ethereum implements this paradigm in a generalised manner. Furthermore it provides a plurality of such resources, each with a distinct state and operating code but able to interact through a message-passing framework with others. We discuss its design, implementation issues, the opportunities it provides and the future hurdles we envisage.
+____
+
+[arabic]
+. Introduction
+
+____
+With ubiquitous internet connections in most places of the world, global information transmission has become incredibly cheap. Technology-rooted movements like Bit- coin have demonstrated through the power of the default, consensus mechanisms, and voluntary respect of the social contract, that it is possible to use the internet to make a decentralised value-transfer system that can be shared across the world and virtually free to use. This system can be said to be a very specialised version of a cryptographi- cally secure, transaction-based state machine. Follow-up systems such as Namecoin adapted this original “currency application” of the technology into other applications albeit rather simplistic ones.
+
+Ethereum is a project which attempts to build the gen- eralised technology; technology on which all transaction- based state machine concepts may be built. Moreover it aims to provide to the end-developer a tightly integrated end-to-end system for building software on a hitherto un- explored compute paradigm in the mainstream: a trustful object messaging compute framework.
+____
+
+[arabic]
+. *Driving Factors.* There are many goals of this project; one key goal is to facilitate transactions between consenting individuals who would otherwise have no means to trust one another. This may be due to geographical separation, interfacing difficulty, or perhaps the incompati- bility, incompetence, unwillingness, expense, uncertainty, inconvenience, or corruption of existing legal systems. By specifying a state-change system through a rich and unam- biguous language, and furthermore architecting a system such that we can reasonably expect that an agreement will be thus enforced autonomously, we can provide a means to this end.
+
+____
+Dealings in this proposed system would have several attributes not often found in the real world. The incorrupt- ibility of judgement, often difficult to find, comes naturally from a disinterested algorithmic interpreter. Transparency, or being able to see exactly how a state or judgement came about through the transaction log and rules or instructional codes, never happens perfectly in human-based systems since natural language is necessarily vague, information
+
+is often lacking, and plain old prejudices are difficult to shake.
+
+Overall, we wish to provide a system such that users can be guaranteed that no matter with which other indi- viduals, systems or organisations they interact, they can do so with absolute confidence in the possible outcomes and how those outcomes might come about.
+____
+
+[arabic, start=2]
+. *Previous Work.* link:#_bookmark73[Buterin [2013a]] first proposed the kernel of this work in late November, 2013. Though now evolved in many ways, the key functionality of a block- chain with a Turing-complete language and an effectively unlimited inter-transaction storage capability remains un- changed.
+
+____
+link:#_bookmark91[Dwork and Naor [1992]] provided the first work into the usage of a cryptographic proof of computational expendi- ture (“proof-of-work”) as a means of transmitting a value signal over the Internet. The value-signal was utilised here as a spam deterrence mechanism rather than any kind of currency, but critically demonstrated the potential for a basic data channel to carry a _strong economic signal_, allowing a receiver to make a physical assertion without having to rely upon _trust_. link:#_bookmark69[Back] link:#_bookmark69[[2002]] later produced a system in a similar vein.
+
+The first example of utilising the proof-of-work as a strong economic signal to secure a currency was by link:#_bookmark107[Vish-] link:#_bookmark107[numurthy et al.] link:#_bookmark107[[2003].] In this instance, the token was used to keep peer-to-peer file trading in check, providing “consumers” with the ability to make micro-payments to “suppliers” for their services. The security model afforded by the proof-of-work was augmented with digital signatures and a ledger in order to ensure that the historical record couldn’t be corrupted and that malicious actors could not spoof payment or unjustly complain about service deliv- ery. Five years later, link:#_bookmark87[Nakamoto [2008]] introduced another such proof-of-work-secured value token, somewhat wider in scope. The fruits of this project, Bitcoin, became the first widely adopted global decentralised transaction ledger.
+
+Other projects built on Bitcoin’s success; the alt-coins introduced numerous other currencies through alteration to the protocol. Some of the best known are Litecoin and Primecoin, discussed by link:#_bookmark101[Sprankel [2013].] Other projects sought to take the core value content mechanism of the pro- tocol and repurpose it; link:#_bookmark70[Aron [2012]] discusses, for example,
+
+1
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 2
+
+the Namecoin project which aims to provide a decentralised name-resolution system.
+
+Other projects still aim to build upon the Bitcoin net- work itself, leveraging the large amount of value placed in the system and the vast amount of computation that goes into the consensus mechanism. The Mastercoin project, first proposed by link:#_bookmark109[Willett] link:#_bookmark109[[2013],] aims to build a richer protocol involving many additional high-level features on top of the Bitcoin protocol through utilisation of a number of auxiliary parts to the core protocol. The Coloured Coins
+
+itself—that would be far too big). They also punctuate the transaction series with incentives for nodes to _mine_. This incentivisation takes place as a state-transition function, adding value to a nominated account.
+
+Mining is the process of dedicating effort (working) to bolster one series of transactions (a block) over any other potential competitor block. It is achieved thanks to a cryptographically secure proof. This scheme is known as a proof-of-work and is discussed in detail in section link:#11.5._Mining_Proof-of-Work[11.5.]
+
+Formally, we expand to:
+
+project, proposed by link:#_bookmark89[Rosenfeld et al. [2012],] takes a similar but more simplified strategy, embellishing the rules of a transaction in order to break the fungibility of Bitcoin’s base currency and allow the creation and tracking of tokens through a special “chroma-wallet”-protocol-aware piece of
+
+(2)
+
+(3)
+
+(4)
+____
+
+__**σ**t__+1 ≡ link:#_bookmark67[Π(]_**σ**t, B_)
+
+_B_ ≡ (_...,_ (__T__0__, T__1__, ...__)_, ..._)
+
+Π(_*σ*, B_) ≡ link:#_bookmark65[Ω(]_B,_ link:#_bookmark0[Υ(Υ(]__*σ*, T__0)__, T__1)_..._)
+
+Where link:#_bookmark65[Ω] is the block-finalisation state transition func-
+
+____
+software.
+
+Additional work has been done in the area with discard- ing the decentralisation foundation; Ripple, discussed by link:#_bookmark74[Boutellier and Heinzen [2014],] has sought to create a “fed- erated” system for currency exchange, effectively creating a new financial clearing system. It has demonstrated that high efficiency gains can be made if the decentralisation premise is discarded.
+
+Early work on smart contracts has been done by link:#_bookmark103[Szabo] link:#_bookmark103[[1997]] and link:#_bookmark86[Miller [1997].] Around the 1990s it became clear that algorithmic enforcement of agreements could become a significant force in human cooperation. Though no specific system was proposed to implement such a system, it was proposed that the future of law would be heavily affected by such systems. In this light, Ethereum may be seen as a general implementation of such a _crypto-law_ system.
+
+For a list of terms used in this paper, refer to Appen- dix link:#Appendix_A._Terminology[A.]
+____
+
+[arabic, start=2]
+. {blank}
++
+____
+The Blockchain Paradigm
+____
+
+____
+Ethereum, taken as a whole, can be viewed as a transaction-based state machine: we begin with a gen- esis state and incrementally execute transactions to morph it into some current state. It is this current state which we accept as the canonical “version” of the world of Ethereum. The state can include such information as account bal- ances, reputations, trust arrangements, data pertaining to information of the physical world; in short, anything that can currently be represented by a computer is admis- sible. Transactions thus represent a valid arc between two states; the ‘valid’ part is important—there exist far more invalid state changes than valid state changes. Invalid state changes might, e.g., be things such as reducing an account balance without an equal and opposite increase elsewhere. A valid state transition is one which comes about through a transaction. Formally:
+
+tion (a function that rewards a nominated party); link:#4.3._The_Block[_B_] is this block, which includes a series of transactions amongst some other components; and link:#_bookmark67[Π] is the block-level state-transition function.
+
+This is the basis of the blockchain paradigm, a model that forms the backbone of not only Ethereum, but all decentralised consensus-based transaction systems to date.
+____
+
+[arabic]
+. *Value.* In order to incentivise computation within the network, there needs to be an agreed method for transmit- ting value. To address this issue, Ethereum has an intrinsic currency, Ether, known also as ETH and sometimes referred to by the Old English ¯D. The smallest subdenomination of Ether, and thus the one in which all integer values of the currency are counted, is the Wei. One Ether is defined as being 10^18^ Wei. There exist other subdenominations of Ether:
+
+____
+Multiplier Name
+
+100 Wei
+
+10^12^ Szabo
+
+10^15^ Finney
+
+10^18^ Ether
+
+Throughout the present work, any reference to value, in the context of Ether, currency, a balance or a payment, should be assumed to be counted in Wei.
+____
+
+[arabic, start=2]
+. *Which History?* Since the system is decentralised and all parties have an opportunity to create a new block on some older pre-existing block, the resultant structure is necessarily a tree of blocks. In order to form a consensus as to which path, from root link:#_bookmark153[(the genesis bloc]k) to leaf (the block containing the most recent transactions) through this tree structure, known as the blockchain, there must be an agreed-upon scheme. If there is ever a disagreement between nodes as to which root-to-leaf path down the block tree is the ‘best’ blockchain, then a _fork_ occurs.
+
+____
+{empty}(1) [#_bookmark0 .anchor]##*_σ_*
+____
+
+__t__+1
+
+____
+≡ Υ(_**σ**t, T_ )
+
+This would mean that past a given point in time (block), multiple states of the system may coexist: some nodes be-
+
+where Υ is the Ethereum state transition function. In Ethereum, Υ, together with *_σ_* are considerably more pow- erful than any existing comparable system; Υ allows com- ponents to carry out arbitrary computation, while *_σ_* allows components to store arbitrary state between transactions. Transactions are collated into blocks; blocks are chained together using a cryptographic hash as a means of refer- ence. Blocks function as a journal, recording a series of transactions together with the previous block and an iden- tifier for the final state (though do not store the final state
+
+lieving one block to contain the canonical transactions, other nodes believing some other block to be canonical, potentially containing radically different or incompatible transactions. This is to be avoided at all costs as the un- certainty that would ensue would likely kill all confidence in the entire system.
+
+The scheme we use in order to generate consensus is a simplified version of the GHOST protocol introduced by link:#_bookmark100[Sompolinsky and Zohar [2013].] This process is described in detail in section link:#10._Blocktree_to_Blockchain[10.]
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 3
+
+Sometimes, a path follows a new protocol from a par- ticular height (block number). This document describes one version of the protocol, namely the _Berlin_ version defined by link:#_bookmark72[Beiko et al. [2021b].] In order to follow back the history of a path, one must reference multiple versions of this document. Here are the block numbers of protocol updates on the Ethereum main network:
+____
+
+[width="100%",cols="45%,55%",options="header",]
+|===
+a|
+____
+Name
+____
+
+|First Block Number
+a|
+____
+__F__Homestead
+____
+
+|1150000
+a|
+____
+__F__TangerineWhistle
+____
+
+|2463000
+a|
+____
+__F__SpuriousDragon
+____
+
+|2675000
+a|
+____
+__F__Byzantium
+____
+
+|4370000
+a|
+____
+__F__Constantinople
+____
+
+|7280000
+a|
+____
+__F__Petersburg
+____
+
+|7280000
+a|
+____
+__F__Istanbul
+____
+
+|9069000
+a|
+____
+__F__MuirGlacier
+____
+
+|9200000
+a|
+____
+__F__Berlin
+____
+
+|12244000
+a|
+____
+__F__London
+____
+
+|12965000
+a|
+____
+__F__ArrowGlacier
+____
+
+|13773000
+|===
+
+____
+Occasionally actors do not agree on a protocol change, and a permanent fork occurs. In order to distinguish be- tween diverged blockchains, EIP-155 by link:#_bookmark79[Buterin] link:#_bookmark79[[2016b]] introduced the concept of chain ID, which we denote by _β_.
+
+For the Ethereum main network
+
+{empty}(5) [#_bookmark1 .anchor]##_β_ = 1
+____
+
+[arabic, start=3]
+. {blank}
++
+____
+Conventions
+____
+
+____
+We use a number of typographical conventions for the formal notation, some of which are quite particular to the present work:
+
+The two sets of highly structured, ‘top-level’, state val- ues, are denoted with bold lowercase Greek letters. They fall into those of world-state, which are denoted *_σ_* (or a variant thereupon) and those of machine-state, *_µ_*.
+
+Functions operating on highly structured values are denoted with an upper-case Greek letter, e.g. link:#_bookmark0[Υ,] the Ethereum state transition function.
+
+For most functions, an uppercase letter is used, e.g. _C_, the general cost function. These may be subscripted to denote specialised variants, e.g. link:#_bookmark146[__C__SSTORE], the cost func- tion for the link:#_bookmark145[SSTORE] operation. For specialised and possibly
+
+externally defined functions, we may format as typewriter text, e.g. the Keccak-256 hash function (as per version 3 of the winning entry to the SHA-3 contest by link:#_bookmark75[Bertoni] link:#_bookmark75[et al. [2011],] rather than the final SHA-3 specification), is
+
+denoted KEC (and generally referred to as plain Keccak). Also, KEC512 refers to the Keccak-512 hash function.
+
+Tuples are typically denoted with an upper-case letter,
+
+e.g. _T_ , is used to denote an Ethereum transaction. This symbol may, if accordingly defined, be subscripted to refer to an individual component, e.g. link:#_bookmark40[__T__n], denotes the nonce of said transaction. The form of the subscript is used to
+
+denote its type; e.g. uppercase subscripts refer to tuples with subscriptable components.
+
+Scalars and fixed-size byte sequences (or, synonymously, arrays) are denoted with a normal lower-case letter, e.g. _n_ is used in the document to denote a link:#_bookmark40[transaction nonce.] Those with a particularly special meaning may be Greek,
+
+e.g. _δ_, the number of items required on the stack for a given operation.
+
+Arbitrary-length sequences are typically denoted as a bold lower-case letter, e.g. *o* is used to denote the byte sequence given as the output data of a message call. For particularly important values, a bold uppercase letter may be used.
+
+Throughout, we assume scalars are non-negative inte- gers and thus belong to the set N. The set of all byte sequences is B, formally defined in Appendix link:#Appendix_B._Recursive_Length_Prefix[B.] If such a set of sequences is restricted to those of a particular length, it is denoted with a subscript, thus the set of all
+
+byte sequences of length 32 is named B32 and the set of all non-negative integers smaller than 2^256^ is named N256. This is formally defined in section link:#4.3._The_Block[4.3.]
+
+Square brackets are used to index into and reference individual components or subsequences of sequences, e.g. *__µ__s*[0] denotes the first item on the machine’s stack. For subsequences, ellipses are used to specify the intended range, to include elements at both limits, e.g. *__µ__m*[0__..__31] denotes the first 32 items of the machine’s memory.
+
+In the case of the global state *_σ_*, which is a sequence of accounts, themselves tuples, the square brackets are used to reference an individual account.
+
+When considering variants of existing values, we follow the rule that within a given scope for definition, if we assume that the unmodified ‘input’ value be denoted by the placeholder then the modified and utilisable value is
+
+denoted as , and intermediate values would be ∗, ∗∗
+
+&c. On very particular occasions, in order to maximise readability and only if unambiguous in meaning, we may use alpha-numeric subscripts to denote intermediate values, especially those of particular note.
+
+When considering the use of existing functions, given a function _f_ , the function link:#_bookmark27[_f_ ^∗^] denotes a similar, element-wise version of the function mapping instead between sequences. It is formally defined in section link:#4.3._The_Block[4.3.]
+
+We define a number of useful functions throughout. [#_bookmark2 .anchor]####One of the more common is _.€_, which evaluates to the last item in the given sequence:
+
+{empty}(6) _.€_(*x*) ≡ *x*[ll**x**ll − 1]
+____
+
+[arabic, start=4]
+. {blank}
++
+____
+Blocks, State and Transactions
+____
+
+____
+Having introduced the basic concepts behind Ethereum, we will discuss the meaning of a transaction, a block and the state in more detail.
+____
+
+[arabic]
+. *World State.* The world state (_state_), is a map- ping between addresses (160-bit identifiers) and account states (a data structure serialised as RLP, see Appendix link:#Appendix_B._Recursive_Length_Prefix[B).] Though not stored on the blockchain, it is assumed that the implementation will maintain this mapping in a modi- fied Merkle Patricia tree (_trie_, see Appendix link:#Appendix_D._Modified_Merkle_Patricia_Tre[D).] The trie requires a simple database backend that maintains a map- ping of byte arrays to byte arrays; we name this underlying database the state database. This has a number of benefits; firstly the root node of this structure is cryptographically dependent on all internal data and as such its hash can be used as a secure identity for the entire system state. Secondly, being an immutable data structure, it allows any previous state (whose root hash is known) to be recalled by simply altering the root hash accordingly. Since we store all such root hashes in the blockchain, we are able to trivially revert to old states.
+
+____
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 4
+
+The account state, *_σ_*[_a_], comprises the following four fields:
+
+[#_bookmark3 .anchor]##*nonce:* A scalar value equal to the number of trans- actions sent from this address or, in the case of accounts with associated code, the number of contract-creations made by this account. For ac- count of address _a_ in state *_σ_*, this would be for- mally denoted *_σ_*[_a_]n.
+
+*balance:* A scalar value equal to the number of Wei
+
+owned by this address. Formally denoted *_σ_*[_a_]~b~.
+
+*storageRoot:* A 256-bit hash of the root node of a Merkle Patricia tree that encodes the storage con- tents of the account (a mapping between 256-bit integer values), encoded into the trie as a mapping from the Keccak 256-bit hash of the 256-bit integer keys to the RLP-encoded 256-bit integer values. The hash is formally denoted *_σ_*[_a_]s.
+
+*codeHash:* The hash of the EVM code of this
+
+account—this is the code that gets executed should this address receive a message call; it is immutable and thus, unlike all other fields, cannot be changed after construction. All such code fragments are contained in the state database under their corre- sponding hashes for later retrieval. This hash is formally denoted *_σ_*[_a_]c, and thus the code may be
+
+denoted as *b*, given that KEC(*b*) = *_σ_*[_a_]c.
+
+Since we typically wish to refer not to the trie’s root hash but to the underlying set of key/value pairs stored within, we define a convenient equivalence:
+____
+
+[arabic, start=7]
+. TRIE _L_^∗^~I~ (*_σ_*[_a_]*~s~*) ≡ *_σ_*[_a_]~s~
+
+____
+The collapse function for the set of key/value pairs in the trie, _L_^∗^~I~ , is defined as the element-wise transformation of the base function __L__I, given as:
+____
+
+[arabic, start=8]
+. __L__I (_k, v_) ≡ KEC(_k_)_,_ RLP(_v_) where:
+
+____
+{empty}(9) _k_ ∈ B32 ∧ _v_ ∈ N
+
+It shall be understood that *_σ_*[_a_]*s* is not a ‘physical’ member of the account and does not contribute to its later serialisation.
+
+If the *codeHash* field is the Keccak-256 hash of the empty string, i.e. *_σ_*[_a_]c = KEC () , then the node represents a simple account, sometimes referred to as a “non-contract” account.
+
+Thus we may define a world-state collapse function __L__S:
+
+{empty}(10) __L__S(*_σ_*) ≡ \{_p_(_a_) : *_σ_*[_a_] ∅}
+
+where
+
+{empty}(11) _p_(_a_) ≡ KEC(_a_)_,_ RLP (*_σ_*[_a_]~n~_, *σ*_[_a_]~b~_, *σ*_[_a_]~s~_, *σ*_[_a_]~c~)
+
+This function, __L__S, is used alongside the trie function to provide a short identity (hash) of the world state. We assume:
+
+{empty}(12) ∀__a__ : *_σ_*[_a_] = ∅ ∨ (_a_ ∈ B20 ∧ _v_(*_σ_*[_a_])) where _v_ is the account validity function:
+
++++(13) _v_(_x_) ≡+++ _x_~n~ ∈ N~256~∧__x__~b~ ∈ N~256~∧__x__~s~ ∈ B~32~∧__x__~c~ ∈ B~32~
+
+An account is _empty_ when it has no code, zero nonce and zero balance:
+
+(14)
+
+EMPTY(_*σ*, a_) ≡ *_σ_*[_a_]~c~ = KEC () ∧**_σ_**[_a_]~n~ = 0∧**_σ_**[_a_]~b~ = 0
+
+Even callable precompiled contracts can have an empty account state. This is because their account states do not usually contain the code describing its behavior.
+
+An account is _dead_ when its account state is non-existent or empty:
+
+{empty}(15) DEAD(_*σ*, a_) ≡ *_σ_*[_a_] = ∅ ∨ EMPTY(_*σ*, a_)
+____
+
+[arabic]
+. *The Transaction.* A transaction (formally, _T_ ) is a single cryptographically-signed instruction constructed by an actor externally to the scope of Ethereum. The sender of a transaction cannot be a contract. While it is assumed that the ultimate external actor will be human in nature, software tools will be used in its construction and dissemi- nationlink:#_bookmark10[^1^]. EIP-2718 by link:#_bookmark110[Zoltu [2020]] introduced the notion of different transaction types. As of the Berlin version of the protocol, there are two transaction types: 0 (legacy) and 1 (EIP-2930 by link:#_bookmark80[Buterin and Swende [2020b]).] Further, there are two subtypes of transactions: those which result in message calls and those which result in the creation of new accounts with associated code (known informally as ‘contract creation’). All transaction types specify a number of common fields:
+
+____
+[#_bookmark4 .anchor]##*type:* EIP-2718 transaction type; formally __T__x.
+
+*nonce:* A scalar value equal to the number of trans- [#_bookmark5 .anchor]####actions sent by the sender; formally __T__n.
+
+*gasPrice:* A scalar value equal to the number of
+
+Wei to be paid per unit of _gas_ for all computation costs incurred as a result of the execution of this [#_bookmark6 .anchor]####transaction; formally __T__p.
+
+*gasLimit:* A scalar value equal to the maximum
+
+amount of gas that should be used in executing this transaction. This is paid up-front, before any computation is done and may not be increased later; formally __T__g.
+
+*to:* The 160-bit address of the message call’s recipi-
+
+ent or, for a contract creation transaction, ∅, used here to denote the only member of B0 ; formally [#_bookmark7 .anchor]##__T__t.
+
+*value:* A scalar value equal to the number of Wei to
+
+be transferred to the message call’s recipient or, in the case of contract creation, as an endowment [#_bookmark8 .anchor]####to the newly created account; formally __T__v.
+
+*r, s:* Values corresponding to the signature of the
+
+transaction and used to determine the sender of the transaction; formally __T__r and __T__s. This is ex- panded in Appendix link:#Appendix_F._Signing_Transactions[F.]
+
+EIP-2930 (type 1) transactions also have:
+
+*accessList:* [#_bookmark9 .anchor]####List of access entries to warm up; for- mally _T_*~A~*. Each access list entry _E_ is a tuple of an account address and a list of storage keys:
+
+_E_ ≡ (__E__a__, E__*s*).
+
+*chainId:* Chain ID; formally __T__c. Must be equal to the network chain ID link:#_bookmark1[_β_].
+
+*yParity:* Signature Y parity; formally __T__y.
+
+1[#_bookmark10 .anchor]####Notably, such ‘tools’ could ultimately become so causally removed from their human-based initiation—or humans may become so causally-neutral—that there could be a point at which they rightly be considered autonomous agents. e.g. contracts may offer bounties to humans for being sent transactions to initiate their execution.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 5
+
+Legacy transactions do not have an *accessList* (_T_*~A~* = ()), while *chainId* and *yParity* for legacy transactions are combined into a single value:
+
+{empty}[#_bookmark11 .anchor]##*w:* A scalar value encoding Y parity and possi- bly chain ID; formally __T__w. __T__w = 27 + __T__y or __T__w = 2__β__+35+__T__y (see EIP-155 by link:#_bookmark79[Buterin [2016b]).]
+
+Additionally, a contract creation transaction (regardless whether legacy or EIP-2930) contains:
+
+*init:* An unlimited size byte array specifying the EVM-code for the account initialisation procedure, formally _T_*~i~*.
+
+*init* is an EVM-code fragment; it returns the *body*, a second fragment of code that executes each time the account receives a message call (either through a trans- action or due to the internal execution of code). *init* is executed only once at account creation and gets discarded immediately thereafter.
+
+In contrast, a message call transaction contains:
+
+*data:* An unlimited size byte array specifying the input data of the message call, formally _T_*~d~*.
+
+Appendix link:#Appendix_F._Signing_Transactions[F] specifies the function, _S_, which maps trans- actions to the sender, and happens through the ECDSA of the SECP-256k1 curve, using the hash of the transaction (excepting the latter three signature fields) as the datum to sign. For the present we simply assert that the sender of a given transaction _T_ can be represented with _S_(_T_ ).
+
+(16)
+
+[#_bookmark12 .anchor]##(__T__n__, T__p__, T__g__, T__t__, T__v__,__ *p*__, T__w__, T__r__, T__s) if __T__x = 0
+
+[#_bookmark13 .anchor]##*parentHash:* The Keccak 256-bit hash of the parent block’s header, in its entirety; formally __H__p.
+
+*ommersHash:* The Keccak 256-bit hash of the om-
+
+mers list portion of this block; formally __H__o.
+
+*beneficiary:* The 160-bit address to which all fees collected from the successful mining of this block be transferred; formally __H__c.
+
+*stateRoot:* The Keccak 256-bit hash of the root
+
+node of the state trie, after all transactions are executed and finalisations applied; formally __H__r.
+
+*transactionsRoot:* The Keccak 256-bit hash of the
+
+root node of the trie structure populated with each transaction in the transactions list portion of the block; formally __H__t.
+
+*receiptsRoot:* The Keccak 256-bit hash of the root
+
+node of the trie structure populated with the re- ceipts of each transaction in the transactions list portion of the block; formally __H__e.
+
+*logsBloom:* The Bloom filter composed from index-
+
+able information (logger address and log topics) contained in each log entry from the receipt of each transaction in the transactions list; formally _H_~b~.
+
+*difficulty:* A scalar value corresponding to the dif-
+
+ficulty level of this block. This can be calculated from the previous block’s difficulty level and the timestamp; formally _H_~d~.
+
+*number:* A scalar value equal to the number of an-
+
+cestor blocks. The genesis block has a number of zero; formally link:#_bookmark30[__H__i].
+
+where
+
+c n p g t v
+
+*A* y r s x
+
+[#_bookmark14 .anchor]####of gas expenditure per block; formally _H_~l~.
+
+*gasUsed:* A scalar value equal to the total gas used
+
+{empty}(17) *p* _T_*~i~* if _T_~t~ = ∅
+
+_T_*~d~* otherwise
+
+Here, we assume all components are interpreted by the RLP as integer values, with the exception of the access list _T_*~A~* and the arbitrary length byte arrays _T_*~i~* and _T_*~d~*.
+
+{empty}(18) __T__x ∈ \{0__,__ 1} ∧ __T__c = _β_ ∧ __T__n ∈ N256 ∧ __T__p ∈ N256 ∧ __T__g ∈ N256 ∧ __T__v ∈ N256 ∧ __T__w ∈ N256 ∧ __T__r ∈ N256 ∧ __T__s ∈ N256 ∧ _T_~y~ ∈ N~1~ ∧ _T_*~d~* ∈ B ∧ _T_*~i~* ∈ B
+
+where
+
+{empty}(19) Nn = \{_P_ : _P_ ∈ N ∧ _P <_ 2__n__}
+
+The address hash _T_*t* is slightly different: it is either a 20-byte address hash or, in the case of being a contract- creation transaction (and thus formally equal to ∅), it is
+
+the RLP empty byte sequence and thus the member of B0:
+
+in transactions in this block; formally __H__g.
+
+*timestamp:* A scalar value equal to the reasonable output of Unix’s time() at this block’s inception; [#_bookmark15 .anchor]####formally link:#_bookmark32[__H__s].
+
+*extraData:* An arbitrary byte array containing data
+
+relevant to this block. This must be 32 bytes or [#_bookmark16 .anchor]####fewer; formally __H__x.
+
+*mixHash:* A 256-bit hash which, combined with the
+
+nonce, proves that a sufficient amount of compu- tation has been carried out on this block; formally [#_bookmark17 .anchor]##__H__m.
+
+*nonce:* A 64-bit value which, combined with the mix-
+
+hash, proves that a sufficient amount of computa- tion has been carried out on this block; formally link:#_bookmark33[__H__n].
+____
+
+[arabic, start=20]
+. _T_
+
+____
+∈ fB20 if __T__t = ∅
+
+[#_bookmark18 .anchor]####The other two components in the block are simply a list
+
+B0 otherwise
+____
+
+[arabic]
+. [#4.3._The_Block .anchor]##*The Block.* The block in Ethereum is the collec- tion of relevant pieces of information (known as the block _header_ ), _H_, together with information corresponding to the comprised transactions, *T*, and a set of other block headers *U* that are known to have a parent equal to the present block’s parent’s parent (such blocks are known as _ommers_link:#_bookmark20[^2^]). The block header contains several pieces of information:
+
+____
+of ommer block headers (of the same format as above),
+
+_B_*~U~* and a series of the transactions, _B_*~T~*. Formally, we can refer to a block _B_:
+____
+
+[arabic, start=21]
+. _B_ ≡ (_B_~H~_, B_*~T~*_, B_*~U~*)
+
+____
+2[#_bookmark20 .anchor]####_ommer_ is a gender-neutral term to mean “sibling of parent”; see https://nonbinary.miraheze.org/wiki/Gender_neutral_language_in_English%23Aunt/Uncle[https://nonbinary.miraheze.org/wiki/Gender_neutral_language_in_] https://nonbinary.miraheze.org/wiki/Gender_neutral_language_in_English%23Aunt/Uncle[English#Aunt/Uncle]
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 6
+____
+
+[arabic]
+. [#_bookmark21 .anchor]##_Transaction Receipt._ In order to encode information about a transaction concerning which it may be useful to form a zero-knowledge proof, or index and search, we encode a receipt of each transaction containing certain in- formation from its execution. Each receipt, denoted _B_*~R~*[_i_] for the __i__th transaction, is placed in an index-keyed link:#_bookmark118[trie] [#_bookmark22 .anchor]####and the root recorded in the header as link:#_bookmark24[__H__e].
+
+____
+The transaction receipt, _R_, is a tuple of five items com-
+
+prising: the type of the transaction, __R__x, the status code of the transaction, __R__z, the cumulative gas used in the block containing the transaction receipt as of immediately after the transaction has happened, __R__u, the set of logs created through execution of the transaction, link:#_bookmark116[_R_*~l~*] and the Bloom filter composed from information in those logs, link:#_bookmark114[_R_~b~]:
+____
+
+[arabic, start=2]
+. _Holistic Validity._ We can assert a block’s validity if and only if it satisfies several conditions: it must be in- ternally consistent with the ommer and transaction block hashes and the given transactions _B_*~T~* (as specified in sec link:#11._Block_Finalisation[11),] when executed in order on the base state *_σ_* (derived from the final state of the parent block), result in a new state of the identity __H__r:
+
+____
+{empty}(33) [#_bookmark23 .anchor]##__H__r ≡ TRIE(_LS_ (Π(_*σ*, B_))) ∧ _H_~o~ ≡ KEC(RLP(_L_^∗^_~H~_ (_B_*~U~*))) ∧ _H_~t~ ≡ TRIE(\{∀__i <__ ll__B__**~T~**ll__, i__ ∈ N :
+
+_p_~T~(_i, B_*~T~*[_i_])}) ∧
+
+[#_bookmark24 .anchor]##_H_~e~ ≡ TRIE(\{∀__i <__ ll__B__**~R~**ll__, i__ ∈ N :
+
+_p_~R~(_i, B_*~R~*[_i_])}) ∧
+
+[#_bookmark26 .anchor]##__R__x is equal to the link:#_bookmark4[type] of the corresponding transaction.
+
+The function __L__R prepares a transaction receipt for being transformed into an RLP-serialised byte array:
+____
+
+[arabic, start=23]
+. _L_~R~(_R_) ≡ (_R_~z~_, R_~u~_, R_~b~_, R_*~l~*)
+
+____
+We assert that the status code __R__z is a non-negative
+
+where __p__T(_k, v_) and __p__R(_k, v_) are pairwise RLP transforma- tions, but with a special treatment for EIP-2718 transac- tions:
+
+(34)
+
+_p_ (_k, T_ ) RLP(_k_)_,_ RLP(link:#_bookmark12[__L__T](_T_ )) if __T__x = 0
+
+(__T__x) · RLP(__L__T(_T_ )) otherwise
+
+integer:
+____
+
+[arabic, start=24]
+. __R__z ∈ N
+
+____
+We assert that __R__u, the cumulative gas used, is a non- negative integer and that the logs Bloom, _R_~b~, is a hash of
+
+and
+
+(35)
+
+__p__R(_k, R_) ≡
+
+RLP(_k_)_,_
+
+RLP(link:#_bookmark26[__L__R](_R_)) if __R__x = 0
+
+(__R__x) · RLP(__L__R(_R_)) otherwise
+
+size 2048 bits (256 bytes):
+____
+
+[arabic, start=25]
+. _R_~u~ ∈ N ∧ _R_~b~ ∈ B~256~
+
+____
+The sequence _R_*~l~* is a series of log entries, (_O_~0~_, O_~1~_, ..._). A log entry, _O_, is a tuple of the logger’s address, _Oa_, a possibly empty series of 32-byte log topics, _O_*t* and some number of bytes of data, _O_*~d~*:
+
+{empty}(26) _O_ ≡ (_O_~a~_,_ (_O_~**t**0~_, O_~**t**1~_, ..._)_, O_*~d~*)
+
+{empty}(27) _O_~a~ ∈ B~20~ ∧ ∀__x__ ∈ _O_*~t~* : _x_ ∈ B~32~ ∧ _O_*~d~* ∈ B
+
+We define the Bloom filter function, _M_ , to reduce a log entry into a single 256-byte hash:
+
+(· is the concatenation of byte arrays).
+
+Furthermore:
+
+{empty}(36) TRIE(__L__S(*_σ_*)) = _P_ (_BH_ )_H_ r
+
+Thus TRIE(__L__S(*_σ_*)) is the root node hash of the Merkle Patricia tree structure containing the key-value pairs of the state *_σ_* with values encoded using RLP, and _P_ (__B__H) is the parent block of _B_, defined directly.
+
+The values stemming from the computation of transac- tions, specifically the link:#_bookmark21[transaction receipts,] _B_*~R~*, and that defined through the transaction’s link:#_bookmark67[state-accumulation func-] link:#_bookmark67[tion, Π,] are formalised later in section link:#11.4._State_&_Nonce_Validation[11.4.]
+____
+
+[arabic]
+. _Serialisation._ The function __L__B and __L__H are the prepa-
+
+____
+{empty}(28) _M_ (_O_) ≡
+____
+
+__x__∈\{__O__a}∪__O__*t*
+
+__M__3:2048(_x_)
+
+____
+ration functions for a block and block header respectively. We assert the types and order of the structure for when
+
+where __M__3:2048 is a specialised Bloom filter that sets three
+
+the RLP transformation is required:
+
+bits out of 2048, given an arbitrary byte sequence. It does
+
+this through taking the low-order 11 bits of each of the first three pairs of bytes in a Keccak-256 hash of the byte sequence.link:#_bookmark28[^3^] Formally:
+
+(37)
+
+(38)
+
+_L_~H~(_H_) ≡ ( _H_~p~_, H_~o~_, H_~c~_, H_~r~_, H_~t~_, H_~e~_, H_~b~_, H_~d~_,_
+
+_H_~i~_, H_~l~_, H_~g~_, H_~s~_, H_~x~_, H_~m~_, H_~n~ )
+
+_L_~B~(_B_) ≡ _L_~H~(_B_~H~)_, L_ ∗T(_B_*~T~*)_, L_^∗^~H~(link:#_bookmark18[_B_*~U~*])
+
+(29)_M_
+
+(*x* : *x* ∈
+
+*y* : *y* ∈ B256 where: (0__,__ 0__, ...,__ 0) except:
+
+where _L_ T takes a special care of EIP-2718 transactions:
+
+B2047−__m__(*x*_,i_)(*y*) = 1
+
+KEC(*x*)[_i, i_ + 1] mod 2048
+____
+
+(39)
+
+____
+_L_ T
+____
+
+(_T_ ) = link:#_bookmark12[__L__T](_T_ ) if __T__x = 0
+
+____
+(__T__x) · RLP(__L__T(_T_ )) otherwise
+
+where B is the bit reference function such that Bj(*x*) equals the bit of index _j_ (indexed from 0) in the byte array *x*. Notably, it treats *x* as big-endian (more significant bits
+
+will have smaller indices).
+
+[#_bookmark27 .anchor]####with _L_^∗^~T~ and _L_^∗^~H~ being element-wise sequence transforma- tions, thus:
+
+_f_ ∗[#_bookmark28 .anchor]#### (__x__0__, x__1__, ...__) ≡ _f_ (__x__0)_, f_ (__x__1)_, ..._ for any function _f_
+
+311 bits = 2^2048^, and the low-order 11 bits is the modulo 2048 of the operand, which is in this case is “each of the first three pairs of bytes in a Keccak-256 hash of the byte sequence.”
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 7
+
+The component types are defined thus:
+
+{empty}(41) link:#_bookmark13[__H__p] ∈ B32 ∧ __H__o ∈ B32 ∧ __H__c ∈ B20 ∧ link:#_bookmark23[__H__r] ∈ B32 ∧ __H__t ∈ B32 ∧ link:#_bookmark24[__H__e] ∈ B32 ∧ link:#_bookmark25[_H_~b~] ∈ B~256~ ∧ _H_~d~ ∈ N ∧ link:#_bookmark30[_H_~i~] ∈ N ∧ link:#_bookmark29[_H_~l~] ∈ N ∧ _H_~g~ ∈ N ∧ link:#_bookmark32[_H_~s~] ∈ N~256~ ∧ link:#_bookmark15[__H__x] ∈ B ∧ __H__m ∈ B32 ∧ link:#_bookmark17[__H__n] ∈ B8
+
+where
+
+{empty}(42) Bn = \{_B_ : _B_ ∈ B ∧ ll__B__ll = _n_}
+
+We now have a rigorous specification for the construc- tion of a formal block structure. The RLP function RLP (see Appendix link:#Appendix_B._Recursive_Length_Prefix[B)] provides the canonical method for trans- forming this structure into a sequence of bytes ready for transmission over the wire or storage locally.
+
+link:#_bookmark77[[2016a].] In the _Byzantium_ release, with EIP-649, the ice age was delayed by creating a fake block number, _H_~i~ , which is obtained by subtracting three million from the actual block number, which in other words reduced _E_ and the time difference between blocks, in order to allow more time to develop proof-of-stake and preventing the network from “freezing” up. Subsequently, EIP-1234 by link:#_bookmark94[Schoedon] link:#_bookmark94[[2018],] EIP-2384 by link:#_bookmark83[Conner [2019],] EIP-3554 by link:#_bookmark102[Hancock] link:#_bookmark102[[2021],] and EIP-4345 by link:#_bookmark71[Beiko et al. [2021a]] increased the [#_bookmark29 .anchor]####subtrahend _κ_.
+
+The canonical gas limit _H_~l~ of a block of header _H_ must fulfil the relation:
+____
+
+[arabic, start=2]
+. _Block Header Validity._ We define _P_ (__B__H parent block of _B_, formally:
+
+) to be the
+
+____
+(53)
+
+_H_~l~ _< P_ (_H_)~H~l
+
++ _P_ (_H_)Hl
+____
+
+1024
+
+[#_bookmark30 .anchor]## +++_P_ (_H_)+++
+
+____
+The block number is the parent’s block number incre- mented by one:
+
+{empty}(44) __H__i [#_bookmark31 .anchor]####≡ _P_ (_H_)Hi + 1
+
+The canonical difficulty of a block of header _H_ is defined as _D_(_H_):
+
+(45)
+
+_H_~l~ ;;: 5000
+
+[#_bookmark32 .anchor]##__H__s is the timestamp (in Unix’s time()) of block _H_ and must fulfil the relation:
+
+_D_(_H_) ≡
+
+where:
+
+max _D_
+____
+
+min
+
+_, P_ (_H_)Hd
+
+____
++ _x_ × __ς__2
+
++ _E_ otherwise
+
+{empty}(54) __H__s _> P_ (_H_)Hs
+
+(46)
+
+(47)
+
+(48)
+
+__D__min ≡ 217
+
+_x P_ (_H_)Hd 2048
+
+__ς__2 ≡ max (_y_ −
+
++++__H__s − _P_ (_H_)H+++s
+____
+
+_,_ −99
+
+____
+This mechanism enforces a homeostasis in terms of the time between blocks; a smaller period between the last two blocks results in an increase in the difficulty level and thus additional computation required, lengthening the likely next period. Conversely, if the period is too large, the
+
+(49)
+
+(50)
+
+(51)
+
+_y_ 1 if ll__P__ (_H_)**~U~**ll = 0
+
+2 otherwise
+
+_E_ ≡ 2l__H__i__t__ ÷100000J−2
+
+_H_~i~ ≡ max(_H_~i~ − _κ,_ 0)
+
+difficulty, and [#_bookmark33 .anchor]####expected time to the next block, is reduced.
+
+The nonce, link:#_bookmark17[__H__n], must satisfy the relations:
+
+2256
+
+5000000
+
+9000000
+
+9700000
+
+10700000 if __H__i
+
+;;: _F_
+____
+
+ArrowGlacier
+
+____
+∧ _m_ = __H__m
+
+[#_bookmark34 .anchor]####n__,__ *d*).
+
+ock’s header _H_, but _without_ the nonce and mix-hash components, *d* being the current DAG, a large data set needed to compute the mix-hash, and PoW
+
+The _Homestead_ difficulty parameter, __ς__2, is used to affect
+
+a dynamic homeostasis of time between blocks, as the time between blocks varies, as discussed below, as implemented in EIP-2 by link:#_bookmark76[Buterin] link:#_bookmark76[[2015].] In the Homestead release, the exponential difficulty symbol, _E_ causes the difficulty to slowly increase (every 100,000 blocks) at an exponential rate, and thus increasing the block time difference, and putting time pressure on transitioning to proof-of-stake. This effect, known as the “difficulty bomb”, or “ice age”, was explained in EIP-649 by link:#_bookmark95[Schoedon and Buterin [2017]]
+
+and delayed and implemented earlier in EIP-2. __ς__2 was also modified in EIP-100 with the use of _x_, the adjustment factor above, and the denominator 9, in order to target the mean block time including uncle blocks by link:#_bookmark77[Buterin]
+
+is the proof-of-work function (see section link:#11.5._Mining_Proof-of-Work[11.5):] this evalu-
+
+ates to an array with the first item being the mix-hash, to prove that a correct DAG has been used, and the second item being a pseudo-random number cryptographically dependent on _H_ and *d*. Given an approximately uniform distribution in the range [0__,__ 2^64^), the expected time to find a solution is proportional to the difficulty, _H_~d~.
+
+This is the foundation of the security of the blockchain and is the fundamental reason why a malicious node can- not propagate newly created blocks that would otherwise overwrite (“rewrite”) history. Because the nonce must sat- isfy this requirement, and because its satisfaction depends on the contents of the block and in turn its composed transactions, creating new, valid, blocks is difficult and,
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 8
+
+over time, requires approximately the total compute power [#_bookmark35 .anchor]####of the trustworthy portion of the mining peers.
+
+Thus we are able to define the block header validity function _V_ (_H_):
+
+256
+____
+
+[arabic, start=56]
+. _V_ (_H_) ≡ _n H_ ∧ _m_ = __H__m ∧
+
+____
+_H_~d~ = _D_(_H_) ∧
+
+_H_~g~ ≤ _H_~l~ ∧
+____
+
+[arabic, start=6]
+. Transaction Execution
+
+____
+The execution of a transaction is the most complex part of the Ethereum protocol: it defines the state transition function link:#_bookmark0[Υ.] It is assumed that any transactions executed first pass the initial tests of intrinsic validity. These include:
+____
+
+[arabic]
+. The transaction is well-formed RLP, with no addi- tional trailing bytes;
+. the transaction signature is valid;
+
+____
+_H_~l~ _< P_ (_H_)~H~l
+
++ _P_ (_H_)Hl
+
+1024
+
+_P_ (_H_)Hl
+____
+
+[arabic, start=3]
+. {blank}
++
+____
+the link:#_bookmark40[transaction nonce] is valid (equivalent to the link:#_bookmark3[sender account’s current nonce);]
+____
+. {blank}
++
+____
+the sender account has no contract code deployed
+____
+
+____
+_H_~l~ ;;: 5000 ∧
+
+__H__s _> P_ (_H_)Hs ∧
+
+__H__i = _P_ (_H_)Hi + 1 ∧
+
+ll__H__xll ≤ 32
+
+where (_n, m_) = PoW(__H__n__, H__n__,__ *d*)
+
+Noting additionally that *extraData* must be at most 32 bytes.
+
+{empty}5. Gas and Payment
+
+In order to avoid issues of network abuse and to sidestep the inevitable questions stemming from Turing complete- ness, all programmable computation in Ethereum is subject to fees. The fee schedule is specified in units of _gas_ (see Ap- pendix link:#Appendix_G._Fee_Schedule[G] for the fees associated with various computation). Thus any given fragment of programmable computation (this includes creating contracts, making message calls, utilising and accessing account storage and executing op- erations on the virtual machine) has a universally agreed cost in terms of gas.
+
+Every transaction has a specific amount of gas associ- ated with it: *gasLimit*. This is the amount of gas which is implicitly purchased from the sender’s account balance. The purchase happens at the according *gasPrice*, also specified in the transaction. The transaction is consid- ered invalid if the account balance cannot support such a purchase. It is named *gasLimit* since any unused gas at the end of the transaction is refunded (at the same rate of purchase) to the sender’s account. Gas does not exist outside of the execution of a transaction. Thus for accounts with trusted code associated, a relatively high gas limit may be set and left alone.
+
+In general, Ether used to purchase gas that is not re- funded is delivered to the _beneficiary_ address, the address of an account typically under the control of the miner. Transactors are free to specify any *gasPrice* that they wish, however miners are free to ignore transactions as they choose. A higher gas price on a transaction will there- fore cost the sender more in terms of Ether and deliver a greater value to the miner and thus will more likely be selected for inclusion by more miners. Miners, in general, will choose to advertise the minimum gas price for which they will execute transactions and transactors will be free to canvas these prices in determining what gas price to offer. Since there will be a (weighted) distribution of min- imum acceptable gas prices, transactors will necessarily have a trade-off to make between lowering the gas price and maximising the chance that their transaction will be mined in a timely manner.
+____
+
+[arabic, start=5]
+. the gas limit is no smaller than the intrinsic gas,
+
+____
+__g__0, used by the transaction; and
+____
+
+[arabic, start=6]
+. {blank}
++
+____
+the sender account balance contains at least the cost, __v__0, required in up-front payment.
+____
+
+____
+Formally, we consider the function link:#_bookmark0[Υ,] with _T_ being a transaction and *_σ_* the state:
+
+{empty}(57) *_σ_* = Υ(_*σ*, T_ )
+
+Thus *_σ_* is the post-transactional state. We also define link:#_bookmark42[Υ^g^] to evaluate to the amount of gas used in the execution of a transaction, link:#_bookmark42[Υ**^l^**] to evaluate to the transaction’s accrued log items and link:#_bookmark42[Υ^z^] to evaluate to the status code resulting from the transaction. These will be formally defined later.
+____
+
+[arabic]
+. [#6.1._Substate .anchor]##*Substate.* Throughout transaction execution, we ac- crue certain information that is acted upon immediately following the transaction. We call this the _accrued transac- tion substate_, or _accrued substate_ for short, and represent it as _A_, which is a tuple:
+
+____
+{empty}(58) _A_ ≡ (_A_*~s~*_, A_*~l~*_, A_*~t~*_, A_~r~_, A_*~a~*_, A_*~K~*)
+
+The tuple contents include _A_*s*, the self-destruct set: a set of accounts that will be discarded following the trans- action’s completion. [#_bookmark38 .anchor]##_A_*~l~* is the log series: this is a series of archived and indexable ‘checkpoints’ in VM code execution that allow for contract-calls to be easily tracked by onlook- ers external to the Ethereum world (such as decentralised application front-ends). _A_*t* is the set of touched accounts, of which the empty ones are deleted at the end of a transac- tion. [#_bookmark37 .anchor]##__A__r is the refund balance, increased through using the
+
+link:#_bookmark145[SSTORE] instruction in order to reset contract storage to
+
+zero from some non-zero value. Though not immediately refunded, it is allowed to partially offset the total execution costs. Finally, EIP-2929 by link:#_bookmark81[Buterin and Swende [2020a]] introduced [#_bookmark39 .anchor]##_A_*a*, the set of accessed account addresses, and _A_*~K~*, the set of accessed storage keys (more accurately, each element of _A_*~K~* is a tuple of a 20-byte account address and a 32-byte storage slot).
+
+We define the empty accrued substate _A_^0^ to have no self-destructs, no logs, no touched accounts, zero refund bal-
+
+ance, all precompiled contracts in the accessed addresses, and no accessed storage:
+
+{empty}(59) _A_^0^ ≡ (∅__,__ ()_,_ ∅__,__ 0__, π,__ ∅)
+
+where _link:#_bookmark51[π]_ is the set of all precompiled addresses.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 9
+____
+
+[arabic, start=2]
+. *Execution.* We define intrinsic gas __g__0, the amount of gas this transaction requires to be paid prior to execution, as follows:
+
+____
+accrued substate _A_ and status code _z_: (66)
+
+****link:#_bookmark44[Λ]4(**_σ_**0__, A__^∗^_, S_(_T_ )_, S_(_T_ )_, g,_
+
+__g__0 ≡
+
+flink:#_bookmark136[__G__txdatazero] if _i_ = 0
+
+link:#_bookmark47[Θ]4(**_σ_**0__, A , S__(_T_ )_, S_(_T_ )__, T__t__,__
+
+ _T_~t~_, g, T_~p~_, T_~v~_, T_~v~_, T_*~d~*_,_ 0__,__ T) otherwise
+
+__i__∈__T__*i*_,T_*d*
+
+link:#_bookmark137[__G__txdatanonzero] otherwise
+
+where
+
++ link:#_bookmark135[__G__txcreate] if __T__t = ∅
+
+0 otherwise
+
+(67)
+
+(68)
+
+_A_^∗^ ≡ _A_^0^ except
+
+_A_^∗^*~a~* ≡ _A_^0^ ∪ \{_S_(_T_ )} ∪~__E__∈__T__~
+
+\{link:#_bookmark9[_E_]a}
+
++ link:#_bookmark138[__G__transaction]
+
+_T_*A* −1
+
+(69)
+____
+
+*a*
+
+____
+_A_^∗^*~K~* ≡ L
+
+*A*
+
+\{∀__i <__ ll__E__**s**ll__, i__ ∈ N : (__E__a__, E__*s*[_i_])}
+
++
+____
+
+__j__=0
+
+____
+__G__accesslistaddress + ll__T__*A*[_j_]**s**ll__G__accessliststorage
+
+__E__∈__T__*A*
+
+and _g_ is the amount of gas remaining after deducting
+
+where _T_*~i~*_, T_*~d~* means the series of bytes of the transaction’s associated data and initialisation EVM-code, depending on whether the transaction is for contract-creation or message-
+
+call. __G__txcreate is added if the transaction is contract- creating, but not if a result of EVM-code. link:#_bookmark132[_G_~accesslistaddress~] and link:#_bookmark133[_G_~accessliststorage~] are the costs of warming up account and storage access, respectively. _G_ is fully defined in Ap-
+
+pendix link:#Appendix_G._Fee_Schedule[G.]
+
+The up-front cost __v__0 is calculated as:
+
+{empty}(61) __v__0 ≡ link:#_bookmark6[__T__g]link:#_bookmark5[__T__p] + link:#_bookmark7[__T__v]
+
+The validity is determined as:
+
+the basic amount required to pay for the existence of the transaction:
+____
+
+[arabic, start=70]
+. _g_ ≡ __T__g − __g__0
+
+____
+Note we use link:#_bookmark47[Θ]4 and link:#_bookmark44[Λ]4 to denote the fact that only the first four components of the functions’ values are taken; the final represents the message-call’s output value (a byte array) and is unused in the context of transaction evalua-
+
+tion.
+
+After the message call or contract creation is processed, the refund counter has to be incremented for the accounts that were self-destructed throughout its invocation.
+____
+
+[arabic, start=71]
+. __A__r ≡ __A__r + __R__selfdestruct
+
+____
+__i__∈__A__*s*
+
+{empty}(62) _S_(_T_ ) = ∅
+
+[#_bookmark40 .anchor]## ∧
+
+Then the state is finalised by determining the amount
+
+__T__n = *_σ_*[_S_(_T_ )]n ∧
+
+__g__0 __T__g ∧
+
+_v_~0~ *_σ_*[_S_(_T_ )]~b~ ∧
+
+allowance from the refund counter, to the sender at the original rate.
+
+_T_~g~ _B_~Hl~ − link:#_bookmark2[_.€_](_B_*~R~*)~u~
+
+Note the final condition; the sum of the transaction’s gas
+____
+
+[arabic, start=72]
+. _ +
+g_^∗^ ≡ _g_
+
+____
++ min
+____
+
+__T__g − _g_
+
+_, A_~r~
+
+____
+limit, __T__g, and the gas utilised in this block prior, given by
+
+link:#_bookmark2[_.€_](_B_*~R~*)~u~, must be no greater than the block’s *gasLimit*, _B_~Hl~. Also, with a slight abuse of notation, we assume that *_σ_*[_S_(_T_ )]~c~ = KEC () , *_σ_*[_S_(_T_ )]~n~ = 0, and *_σ_*[_S_(_T_ )]~b~ = 0 if *_σ_*[_S_(_T_ )] = ∅.
+
+The execution of a valid transaction begins with an irrevocable change made to the state: the link:#_bookmark3[nonce of the] link:#_bookmark3[account of the sender,] _S_(_T_ ), is incremented by one and the balance is reduced by part of the up-front cost, __T__g__T__p. The
+
+The total refundable amount is the legitimately remain-
+
+ing gas _g_ , added to link:#_bookmark37[__A__r], with the latter component being capped up to a maximum of half (rounded down) of the total amount used __T__g − _g_ . Therefore, _g_^∗^ is the total gas that remains after the transaction has been executed.
+
+The Ether for the gas is given to the miner, whose address is specified as the beneficiary of the present block
+
+_B_. So we define the pre-final state *_σ_*^∗^ in terms of the
+
+provisional state **_σ_**P:
+
+gas available for the proceeding computation, _g_, is defined
+
+as __T__g − __g__0. The computation, whether contract creation
+____
+
+[arabic, start=73]
+. {blank}
+
+____
+**_σ_**∗ ≡ **_σ_**P except
+
+or a message call, results in an eventual state (which may legally be equivalent to the current state), the change to which is deterministic and never invalid: there can be no invalid transactions from this point.
+____
+
+[arabic, start=74]
+. {blank}
+. {blank}
+. {blank}
+
+____
+*_σ_*^∗^[_S_(_T_ )]~b~ ≡ *_σ_*~P~[_S_(_T_ )]~b~ + _g_^∗^_T_~p~
+
+*_σ_*^∗^[_m_]~b~ ≡ *_σ_*~P~[_m_]~b~ + (_T_~g~ − _g_^∗^)_T_~p~ _m_ ≡ _B_~Hc~
+
+We define the checkpoint state **_σ_**0:
+____
+
+The final state, *_σ_* , is reached after deleting all accounts
+
+[#_bookmark41 .anchor]####that either appear in the self-destruct set or are touched
+
+____
+(63)
+
+(64)
+
+**_σ_**0 ≡ *_σ_* except:
+
+*_σ_*~0~[_S_(_T_ )]~b~ ≡ *_σ_*[_S_(_T_ )]~b~ − _T_~g~_T_~p~
+
+and empty:
+____
+
+[arabic, start=77]
+. {blank}
+
+____
+*_σ_* ≡ *_σ_*^∗^ except
+
+(65)
+
+**_σ_**0[_S_(_T_ )]n ≡ *_σ_*[_S_(_T_ )]n + 1
+____
+
+[arabic, start=78]
+. {blank}
+
+____
+∀__i__ ∈ _A_*s* : *_σ_* [_i_] = ∅
+
+Evaluating **_σ_**P
+
+from **_σ_**0
+
+depends on the transaction type;
+____
+
+[arabic, start=79]
+. {blank}
+
+____
+∀__i__ ∈ _A_*t* : *_σ_* [_i_] = ∅ if DEAD(**_σ_**∗__, i__)
+
+either contract creation or message call; we define the tuple of post-execution provisional state **_σ_**P, remaining gas _g_ ,
+
+[#_bookmark42 .anchor]####And finally, we specify Υ^g^, the total gas used in this transaction Υ**^l^**, the logs created by this transaction and
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 10
+
+Υ^z^, the status code of this transaction:
+
+(90)
+
+*_σ_*^∗^[_a_] = 1__, v__ + _v ,_ link:#_bookmark118[TRIE](∅)_,_ KEC ()
+____
+
+[arabic, start=80]
+. {blank}
+. {blank}
+
+____
+Υg(_*σ*, T_ ) ≡ __T__g − __g__∗
+
+Υ**^l^**(_*σ*, T_ ) ≡ link:#_bookmark38[_A_*~l~*]
+
+(91)
+
+*_σ_*^∗^[_s_] =
+
+∅ if *_σ_*[_s_] = ∅ ∧ _v_ = 0
+
+*a*^∗^ otherwise
+____
+
+[arabic, start=82]
+. {blank}
+
+____
+Υ^z^(_*σ*, T_ ) ≡ _z_
+
+(92)
+
+*a*^∗^ ≡ (*_σ_*[_s_]~n~_, *σ*_[_s_]~b~ − _v, *σ*_[_s_]*~s~*_, *σ*_[_s_]~c~)
+
+These are used to help define the link:#_bookmark21[transaction receipt] and are also used link:#_bookmark66[later] for state and nonce validation.
+____
+
+[arabic, start=6]
+. {blank}
++
+____
+Contract Creation
+____
+
+____
+There are a number of intrinsic parameters used when creating an account: sender (_s_), original transactorlink:#_bookmark46[^4^] (_o_), available gas (_g_), gas price (_p_), endowment (_v_) together with an arbitrary length byte array, *i*, the initialisation EVM code, the present depth of the message-call/contract- creation stack (_e_), the salt for new account’s address (_ζ_) and finally the p[#_bookmark43 .anchor]####ermission to make modifications to the state (_w_). The salt _ζ_ might be missing (_ζ_ = ∅); formally,
+
+{empty}(83) _ζ_ ∈ B32 ∪ B0
+
+where _v_ is the account’s pre-existing value, in the event it was previously in existence:
+
+{empty}(93) _v_ 0 if *_σ_*[_a_] = ∅
+
+*_σ_*[_a_]~b~ otherwise
+
+Finally, the account is initialised through the execution of the initialising EVM code *i* according to the execution model (see section link:#9._Execution_Model[9).] Code execution can effect several events that are not internal to the execution state: the account’s storage can be altered, further accounts can be created and further message calls can be made. As such, the code execution function link:#9.4._Execution_Overview[Ξ] evaluates to a tuple of the resultant state *_σ_*^∗∗^, available gas remaining _g_^∗∗^, the re- sultant accrued substate _A_^∗∗^ and the body code of the account *o*.
+
+If the creation was caused by link:#_bookmark150[CREATE2], then _ζ_ ∅.
+
+[#_bookmark44 .anchor]####We define the creation function formally as the function Λ, which evaluates from these values, together with the state *_σ_* and the accrued substate _A_, to the tuple containing the new state, remaining gas, new accrued substate, status code and output (_*σ* , g , A , z,_ *o*):
+
+{empty}(84) (_*σ* , g , A , z,_ *o*) ≡ Λ(_*σ*, A, s, o, g, p, v,_ *i*_, e, ζ, w_)
+
+The address of the new account is defined as being the rightmost 160 bits of the Keccak-256 hash of the link:#_bookmark113[RLP] encoding of the structure containing only the sender and the link:#_bookmark3[account nonce.] For link:#_bookmark150[CREATE2] the rule is different and is described in EIP-1014 by link:#_bookmark82[Buterin] link:#_bookmark82[[2018].] Combining the two cases, we define the resultant address for the new account _a_:
+
+{empty}(94) (*_σ_*^∗∗^_, g_^∗∗^_, A_^∗∗^_,_ *o*) ≡ Ξ(*_σ_*^∗^_, g, A_^∗^_, I_)
+
+where _I_ contains the parameters of the link:#9.3._Execution_Environment[execution environ-] link:#9.3._Execution_Environment[men]t, that is:
+
+{empty}(85) _a_ [#_bookmark45 .anchor]####≡ ADDR(_s, *σ*_[_s_]n − 1__, ζ,__ *i*)
+
+{empty}(86) ADDR(_s, n, ζ,_ *i*) ≡ B96__..__255 KEC __L__A(_s, n, ζ,_ *i*)
+
+_I_*~d~* evaluates to the empty tuple as there is no input data to this call. __I__H has no special treatment and is determined
+
+(87)
+
+__L__A(_s, n, ζ,_ *i*) ≡
+
+RLP (_s, n_) if _ζ_ = ∅
+
+{empty}(255) · _s_ · _ζ_ · KEC(*i*) otherwise
+
+from the blockchain.
+
+Code execution depletes gas, and gas may not go below zero, thus execution may exit before the code has come
+
+where · is the concatenation of byte arrays, B__~a..b~__(_X_) evalu- ates to a binary value containing the bits of indices in the range [_a, b_] of the binary data _X_, and *_σ_*[_x_] is the address state of _x_, or ∅ if none exists. Note we use one fewer than
+
+the sender’s nonce value; we assert that we have incre- mented the sender account’s nonce prior to this call, and so the value used is the sender’s nonce at the beginning of the responsible transaction or VM operation.
+
+The address of the new account is added to the set of accessed accounts:
+____
+
+[arabic, start=88]
+. _A_^∗^ ≡ _A_ except _A_^∗^*~a~* ≡ _A_*~a~* ∪ \{_a_}
+
+____
+The account’s nonce is initially defined as one, the bal- ance as the value passed, the storage as empty and the code hash as the Keccak 256-bit hash of the empty string; the sender’s balance is also reduced by the value passed. Thus the mutated state becomes *_σ_*^∗^:
+____
+
+[arabic, start=89]
+. *_σ_*^∗^ ≡ *_σ_* except:
+
+____
+to a natural halting state. In this (and several other) ex- ceptional cases we say an out-of-gas (OOG) exception has occurred: The evaluated state is defined as being the empty set, ∅, and the entire create operation should have no effect on the state, effectively leaving it as it was immediately prior to attempting the creation.
+
+If the initialization code completes successfully, a final contract-creation cost is paid, the code-deposit cost, _c_, proportional to the size of the created contract’s code:
+
+{empty}(104) _c_ ≡ _G_~codedeposit~ × ll**o**ll
+
+If there is not enough gas remaining to pay this, i.e.
+
+_g_^∗∗^ _< c_, then we also declare an out-of-gas exception.
+
+The gas remaining will be zero in any such exceptional condition, i.e. if the creation was conducted as the recep- tion of a transaction, then this doesn’t affect payment of the intrinsic cost of contract creation; it is paid regardless. However, the value of the transaction is not transferred to the aborted contract’s address when we are out-of-gas.
+
+4[#_bookmark46 .anchor]####which can differ from the sender in the case of a message call or contract creation not directly triggered by a transaction but coming from the execution of EVM-code
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 11
+
+If such an exception does not occur, then the remaining gas is refunded to the originator and the now-altered state is allowed to persist. Thus formally, we may specify the resultant state, gas, accrued substate and status code as (_*σ* , g , A , z_) where:
+
+(105)
+
+_g_ 0 if _F_
+
+_g_^∗∗^ − _c_ otherwise
+
+(106)
+
+*_σ_* if _F_ ∨ *_σ_*^∗∗^ = ∅
+
+******_σ_** except:
+
+recipient (_r_), the account whose code is to be executed (_c_, usually the same as recipient), available gas (_g_), value (_v_) and gas price (_p_) together with an arbitrary length byte array, *d*, the input data of the call, the present depth of the message-call/contract-creation stack (_e_) and finally the permission to make modifications to the state (_w_).
+
+Aside from evaluating to a new state and accrued transaction substate, message calls also have an extra component—the output data denoted by the byte array *o*. This is ignored when executing transactions, however mes- sage calls can be initiated due to VM-code execution and in this case this information is used.
+
+(110)
+
+(*_σ_* _, g_ _, A_ _, z,_ *o*) ≡ [#_bookmark47 .anchor]####Θ(__*σ*, A, s, o, r, c, g, p, v, v__˜__,__ *d*_, e, w_)
+
+*_σ_* ≡
+
+(107)
+
+*_σ_* [_a_] = ∅ if DEAD(*_σ_*^∗∗^_, a_)
+
+*_σ_*^∗∗^ except:
+____
+
+ *_σ_* [_a_]c = KEC(*o*) otherwise
+
+Note that we need to differentiate between the value that
+
+____
+is to be transferred, _v_, from the value apparent in the execution context, __v__˜, for the DELEGATECALL instruction. We define **_σ_**1, the first transitional state as the orig- inal state but with the value transferred from sender to
+
+_A A_^∗^ if _F_ ∨ *_σ_*^∗∗^ = ∅
+
+_A_^∗∗^ otherwise
+
+(108)
+
+_z_ 0 if _F_ ∨ *_σ_*^∗∗^ = ∅
+
+1 otherwise
+
+where (109)
+
+_F_ ≡ *_σ_*[_a_] = ∅ ∧ *_σ_*[_a_]_c_ = KEC () ∨ *_σ_*[_a_]_n_ = 0 ∨
+
+(*_σ_*^∗∗^ = ∅ ∧ *o* = ∅) ∨
+
+_g_^∗∗^ _< c_ ∨
+
+recipient:
+
+{empty}(111) *_σ_*~1~[_r_]~b~ ≡ *_σ_*[_r_]~b~ + _v_ ∧ *_σ_*~1~[_s_]~b~ ≡ *_σ_*[_s_]~b~ − _v_
+
+unless _s_ = _r_.
+
+Throughout the present work, it is assumed that if **_σ_**1[_r_] was originally undefined, it will be created as an account with no code or state and zero balance and nonce. Thus the previous equation should be taken to mean:
+
+{empty}(112) *_σ_*~1~ ≡ *_σ_*~1~ except:
+
+ll**o**ll _>_ 24576
+
+[#_bookmark48 .anchor]##(113) **_σ_**1[_s_] ≡ f∅
+
+if *_σ_* ~1~[_s_] = ∅
+
+∧ _v_ = 0
+
+The exception in the determination of *_σ_* dictates that *o*, the resultant byte sequence from the execution of the initialisation code, specifies the final body code for the newly-created account.
+
+Note that intention is that the result is either a suc- cessfully created new contract with its endowment, or no new contract with no transfer of value. In addition, ob-
+
+serve that if the execution of the initialising code link:#_bookmark151[reverts] (*_σ_*^∗∗^ = ∅ ∧ *o* = ∅), the resultant gas _g_ is not depleted (provided there was no other exception), but no new ac-
+
+count is created.
+
+7.1. *Subtleties.* Note that while the initialisation code is executing, the newly created address exists but with no intrinsic body codelink:#_bookmark49[^5^]. Thus any message call received by it during this time causes no code to be executed. If the initialisation execution ends with a SELFDESTRUCT instruction, the matter is moot since the account will be deleted before the transaction is completed. For a normal STOP code, or if the code returned is otherwise empty, then the state is left with a zombie account, and any remaining balance will be locked into the account forever.
+____
+
+[arabic, start=6]
+. {blank}
++
+____
+Message Call
+____
+
+____
+In the case of executing a message call, several param- eters are required: sender (_s_), transaction originator (_o_),
+
+**a**1 otherwise
+
+{empty}(114) *a*~1~ ≡ *_σ_* ~1~[_s_]~n~_, *σ*_ ~1~[_s_]~b~ − _v, *σ*_ ~1~[_s_]*~s~*_, *σ*_ ~1~[_s_]~c~
+
+{empty}(115) and *_σ_*~1~ ≡ *_σ_* except:
+
+(116)
+
+*_σ_* ~1~[_r_] ≡ (0__, v,__ TRIE(∅)_,_ KEC(())) if *_σ_*[_r_] = ∅ ∧ _v_ = 0
+
+*_σ_* ~1~[_r_] ≡ ∅ if *_σ_*[_r_] = ∅ ∧ _v_ = 0
+
+**_σ_** ~1~[_r_] ≡ *a* ~1~ otherwise
+
+{empty}(117) *a* ~1~ ≡ (*_σ_*[_r_]~n~_, *σ*_[_r_]~b~ + _v, *σ*_[_r_]*~s~*_, *σ*_[_r_]~c~)
+
+The account’s associated code (identified as the frag- ment whose Keccak-256 hash is *_σ_*[_c_]c) is executed according to the execution model (see section link:#9._Execution_Model[9).] Just as with con- tract creation, if the execution halts in an exceptional fashion (i.e. due to an exhausted gas supply, stack under- flow, invalid jump destination or invalid instruction), then no gas is refunded to the caller and the state is reverted to the point immediately prior to balance transfer (i.e. *_σ_*).
+
+5[#_bookmark49 .anchor]####During initialization code execution, EXTCODESIZE on the address should return zero, which is the length of the code of the account while
+
+CODESIZE should return the length of the initialization code (as defined in link:#H.2._Instruction_Set[H.2).]
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 12
+
+[#_bookmark50 .anchor]####where
+____
+
+[arabic, start=131]
+. Ξ ≡
+
+____
+and
+
+*_σ σ_* if *_σ_*^∗∗^ = ∅
+
+*_σ_*^∗∗^ otherwise
+
+0 if *_σ_*^∗∗^ = ∅ ∧
+____
+
+*o* = ∅
+
+_g_^∗∗^ otherwise
+
+____
+_A A_ if *_σ_*^∗∗^ = ∅
+
+_A_^∗∗^ otherwise
+
+f0 if *_σ_*^∗∗^ = ∅
+
+ΞECREC(**_σ_**1__, g, A, I__) if _c_ = 1 ΞSHA256(**_σ_**1__, g, A, I__) if _c_ = 2 ΞRIP160(**_σ_**1__, g, A, I__) if _c_ = 3 ΞID(**_σ_**1__, g, A, I__) if _c_ = 4 ΞEXPMOD(**_σ_**1__, g, A, I__) if _c_ = 5 ΞBN ADD(**_σ_**1__, g, A, I__) if _c_ = 6 ΞBN MUL(**_σ_**1__, g, A, I__) if _c_ = 7 ΞSNARKV(**_σ_**1__, g, A, I__) if _c_ = 8 ΞBLAKE2 F(**_σ_**1__, g, A, I__) if _c_ = 9
+
+Ξ(**_σ_**1__, g, A, I__) otherwise
+
+formal model of a virtual state machine, known as the Ethereum Virtual Machine (EVM). It is a __quasi-__Turing- complete machine; the _quasi_ qualification comes from the fact that the computation is intrinsically bounded through a parameter, _gas_, which limits the total amount of compu- tation done.
+____
+
+[arabic]
+. *Basics.* The EVM is a simple stack-based architec- ture. The word size of the machine (and thus size of stack items) is 256-bit. This was chosen to facilitate the Keccak- 256 hash scheme and elliptic-curve computations. The memory model is a simple word-addressed byte array. The stack has a maximum size of 1024. The machine also has an independent storage model; this is similar in concept to the memory but rather than a byte array, it is a word- addressable word array. Unlike memory, which is volatile, storage is non volatile and is maintained as part of the system state. All locations in both storage and memory are well-defined initially as zero.
+
+____
+The machine does not follow the standard von Neu- mann architecture. Rather than storing program code in generally-accessible memory or storage, it is stored separately in a virtual ROM interactable only through a specialised instruction.
+
+The machine can have exceptional execution for several reasons, including stack underflows and invalid instruc- tions. Like the out-of-gas exception, they do not leave state changes intact. Rather, the machine halts immedi- ately and reports the issue to the execution agent (either the transaction processor or, recursively, the spawning execution environment) which will deal with it separately.
+____
+
+[arabic, start=2]
+. *Fees Overview.* Fees (denominated in gas) are charged under three distinct circumstances, all three as prerequisite to the execution of an operation. The first and most common is the fee intrinsic to the computation of the operation (see Appendix link:#Appendix_G._Fee_Schedule[G).] Secondly, gas may be deducted in order to form the payment for a subordinate
+
+[arabic, start=132]
+. KEC(_I_*~b~*) = *_σ_*[_c_]~c~
+
+____
+It is assumed that the client will have stored the pair (KEC(_I_*~b~*)_, I_*~b~*) at some point prior in order to make the determination of _I_*~b~* feasible.
+
+As can be seen, there are nine exceptions to the usage of the general execution framework Ξ for evaluation of the message call: these are so-called ‘precompiled’ contracts, meant as a preliminary piece of architecture that may later become _native extensions_. The contracts in addresses 1 to 9 execute the elliptic curve public key recovery function, the SHA2 256-bit hash scheme, the RIPEMD 160-bit hash scheme, the identity function, arbitrary precision modular exponentiation, elliptic curve addition, elliptic curve scalar multiplication, an elliptic curve pairing check, and the BLAKE2 compression function F respectively. Their full formal definition is in Appendix link:#Appendix_E._Precompiled_Contracts[E.] [#_bookmark51 .anchor]####We denote the set of the addresses of the precompiled contracts by _π_:
+
+{empty}(133) _π_ ≡ \{1__,__ 2__,__ 3__,__ 4__,__ 5__,__ 6__,__ 7__,__ 8__,__ 9}
+____
+
+[arabic, start=6]
+. {blank}
++
+____
+[#9._Execution_Model .anchor]####Execution Model
+____
+
+____
+The execution model specifies how the system state is altered given a series of bytecode instructions and a small tuple of environmental data. This is specified through a
+
+message call or contract creation; this forms part of the payment for CREATE, CREATE2, CALL and CALLCODE. Finally, gas may be paid due to an increase in the usage of the memory.
+
+Over an account’s execution, the total fee for memory- usage payable is proportional to smallest multiple of 32 bytes that are required such that all memory indices (whether for read or write) are included in the range. This is paid for on a just-in-time basis; as such, referencing an area of memory at least 32 bytes greater than any previ- ously indexed memory will certainly result in an additional memory usage fee. Due to this fee it is highly unlikely addresses will ever go above 32-bit bounds. That said, implementations must be able to manage this eventuality. Storage fees have a slightly nuanced behaviour—to in- centivise minimisation of the use of storage (which corre- sponds directly to a larger state database on all nodes), the execution fee for an operation that clears an entry in the storage is not only waived, a qualified refund is given; in fact, this refund is effectively paid up-front since the initial usage of a storage location costs substantially more
+
+than normal usage.
+
+See Appendix link:#Appendix_H._Virtual_Machine_Specificatio[H] for a rigorous definition of the EVM gas cost.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 13
+____
+
+[arabic]
+. [#9.3._Execution_Environment .anchor]##*Execution Environment.* In addition to the sys- tem state *_σ_*, the remaining gas for computation _g_, and the accrued substate _A_, there are several pieces of important information used in the execution environment that the execution agent must provide; these are contained in the tuple _I_:
+* __I__a, the address of the account which owns the code that is executing.
+* __I__o, the sender address of the transaction that orig- inated this execution.
+* __I__p, the price of gas in the transaction that origi- [#_bookmark54 .anchor]####nated this execution.
+* _I_*~d~*, the byte array that is the input data to this execution; if the execution agent is a transaction,
+
+____
+should halt.
+
+{empty}(135) Ξ(_*σ*, g, A, I_) ≡ (__*σ* , *µ*__g__, A ,__ *o*)
+
+{empty}(136) (_*σ* , *µ* , A , ...,_ *o*) ≡ _X_ (_*σ*, *µ*, A, I_)
+____
+
+[width="100%",cols="43%,37%,12%,8%",options="header",]
+|===
+a|
+____
+(137)
+____
+
+|**_µ_**g a|
+____
+≡
+____
+
+|_g_
+a|
+____
+(138)
+____
+
+|**_µ_**pc a|
+____
+≡
+____
+
+|0
+|===
+
+____
+[#_bookmark55 .anchor]#### ∅__, *µ*, A, I,__ ∅ if _Z_(_*σ*, *µ*, A, I_)
+
+this would be the transaction data.
+____
+
+* __I__s, the address of the account which caused the
+
+____
+_X_ (_*σ*, *µ*, A, I_)
+
+≡ **** ∅__, *µ*__ _, A, I,_ *o* if _w_ =
+
+REVERT
+
+code to be executing; if the execution agent is a transaction, this would be the transaction sender.
+____
+
+* __I__v, the value, in Wei, passed to this account as part of the same procedure as execution; if the
+
+____
+execution agent is a transaction, this would be the transaction value.
+____
+
+* _I_*~b~*, the byte array that is the machine code to be
+
+____
+executed.
+____
+
+* __I__H, the block header of the present block.
+
+____
+where (144)
+
+(145)
+
+(146)
+
+_O_(_*σ*, *µ*, A, I_) *o* if *o* = ∅
+
+__X O__(_*σ*, *µ*, A, I_) otherwise
+
+*o* ≡ _H_(_*µ*, I_)
+
+(_a, b, c, d_) · _e_ ≡ (_a, b, c, d, e_)
+
+*_µ_* ≡ *_µ_* except:
+____
+
+* __I__e, the depth of the present message-call or
+
+____
+contract-creation (i.e. the number of CALLs or
+
+CREATE(2)s being executed at present).
+
+(147)
+____
+
+**_µ_**g
+
+____
+≡ **_µ_**g
+____
+
+* _ +
+C_(_*σ*, *µ*, A, I_)
+** __I__w, the permission to make modifications to the
+
+____
+state.
+
+The execution model defines the function Ξ, which can compute the resultant state *_σ_* , the remaining gas _g_ , the resultant accrued substate _A_ and the resultant output, *o*, given these definitions. For the present context, we will define it as:
+
+{empty}(134) (_*σ* , g , A ,_ *o*) ≡ Ξ(_*σ*, g, A, I_)
+
+where we will remember that _A_, the accrued substate, is defined in section link:#6.1._Substate[6.1.]
+____
+
+[arabic]
+. [#9.4._Execution_Overview .anchor]##*Execution Overview.* We must now define the Ξ function. In most practical implementations this will be modelled as an iterative progression of the pair comprising the full system state, *_σ_* and the machine state, *_µ_*. For- mally, we define it recursively with a function _X_. This uses an iterator function _O_ (which defines the result of a
+
+____
+Note that, when we evaluate Ξ, we drop the fourth
+
+element _I_ and extract the remaining gas **_µ_**g from the resultant machine state *_µ_* .
+
+_X_ is thus cycled (recursively here, but implementations are generally expected to use a simple iterative loop) until either _link:#_bookmark59[Z]_ becomes true indicating that the present state is exceptional and that the machine must be halted and any changes discarded or until _link:#_bookmark60[H]_ becomes a series (rather than the empty set) indicating that the machine has reached a controlled halt.
+____
+
+[arabic]
+. _Machine State._ The machine state *_µ_* is defined as the tuple (_g, pc,_ *m*_, i,_ *s*) which are the gas available, the
+
+____
+program counter _pc_ ∈ N256 , the memory contents, the active number of words in memory (counting continuously
+
+from position 0), and the stack contents. The memory contents *_µ_* are a series of zeroes of size 2^256^.
+
+For the ease of reading, the instruction mnemonics,
+
+written in small-caps (e.g. ADD), should be interpreted as their numeric equivalents; the full table of instructions and their specifics is given in Appendix link:#Appendix_H._Virtual_Machine_Specificatio[H.]
+
+For the purposes of defining _Z_, _H_ and _O_, we define _w_
+
+as the current operation to be executed:
+
+single cycle of the state machine) together with functions
+
+_link:#_bookmark59[Z]_ which determines if the present state is an link:#_bookmark59[exceptional]
+
+{empty}(148) _w_ ≡
+
+f__I__*~b~*[**_µ_**pc
+____
+
+] if **_µ_**pc
+
+____
+_<_ ll__I__**~b~**ll
+
+link:#_bookmark59[halting] state of the machine and link:#_bookmark60[_H_], specifying the output data of the instruction if and only if the present state is a link:#_bookmark60[[#_bookmark58 .anchor]####normal halting] state of the machine.
+
+The empty sequence, denoted (), is not equal to the empty set, denoted ∅; this is important when interpreting the output of _H_, which evaluates to ∅ when execution is to continue but a series (potentially empty) when execution
+
+link:#_bookmark143[STOP] otherwise
+
+We also assume the fixed amounts of _δ_ and _α_, specifying the stack items removed and added, both subscriptable on the instruction and an instruction cost function _C_ eval- uating to the full cost, in gas, of executing the given instruction.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 14
+____
+
+[arabic, start=2]
+. [#_bookmark59 .anchor]##_Exceptional Halting._ The exceptional halting func- tion _Z_ is defined as:
+
+____
+(149)
+
+_Z_(_*σ*, *µ*, A, I_) ≡ _**µ**g < C_(_*σ*, *µ*, A, I_) ∨
+
+[#_bookmark60 .anchor]####9.4.4. _Normal Halting._ The normal halting function _H_ is defined:
+
+(154)
+
+__H__RETURN(*_µ_*) if _w_ ∈ \{link:#_bookmark149[RETURN]_,_ REVERT}
+
+_δw_ = ∅ ∨ ll**_µ_~s~**ll _< δw_ ∨
+
+(_w_ = JUMP ∧ *__µ__s*[0] ∈__/ D__(_I_*~b~*)) ∨
+
+_H_(_*µ*, I_) ≡
+
+() if _w_ ∈ \{link:#_bookmark143[STOP]_,_ link:#_bookmark152[SELFDESTRUCT]}
+
+∅ otherwise
+
+where
+
+(_w_ = JUMPI ∧ *__µ__s*[1] = 0 ∧
+
+*__µ__s*[0] ∈__/ D__(_I_*~b~*)) ∨
+
+(_w_ = RETURNDATACOPY ∧
+
+*__µ__s*[1] + *__µ__s*[2] _>_ ll**__µ__o**ll) ∨ ll**_µ_~s~**ll − _δw_ + _αw >_ 1024 ∨ (¬__I__w ∧ _W_ (_w, *µ*_)) ∨
+
+(_w_ = SSTORE ∧ __**µ**g G__callstipend)
+
+The data-returning halt operations, link:#_bookmark149[RETURN] and REVERT, have a special function __H__RETURN. Note also the difference between the empty sequence and the empty set as discussed link:#_bookmark58[here.]
+____
+
+[arabic, start=2]
+. *The Execution Cycle.* Stack items are added or removed from the left-most, lower-indexed portion of the series; all other items remain unchanged:
+
+____
+{empty}(150) _W_ (_w, *µ*_) ≡ _w_ ∈ \{CREATE__,__ CREATE2__,__ SSTORE__,__
+
+SELFDESTRUCT} ∨
+
+LOG0 ≤ _w_ ∧ _w_ ≤ LOG4 ∨
+
+_w_ = CALL ∧ *__µ__s*[2] = 0
+
+(155)
+
+(156)
+
+(157)
+
+(158)
+____
+
+_O_ (_*σ*, *µ*, A, I_) ≡ (_*σ* , *µ* , A , I_)
+
+____
+∆ ≡ _αw_ − _δw_
+
+ll**__µ__s**ll ≡ ll**__µ__s**ll + ∆
+
+∀__x__ ∈ [_αw,_ ll**__µ__s**ll) : *__µ__s*[_x_] ≡ *_µ_~s~*[_x_ − ∆]
+
+This states that the execution is in an exceptional halt- ing state if there is insufficient gas, if the instruction is invalid (and therefore its _δ_ subscript is undefined), if there are insufficient stack items, if a JUMP/JUMPI destination is invalid, the new stack size would be larger than 1024 or state modification is attempted during a static call. The as-
+
+The gas is reduced by the instruction’s gas cost and for most instructions, the program counter increments on each cycle, for the three exceptions, we assume a function _J_ , subscripted by one of two instructions, which evaluates to the according value:
+
+tute reader will realise that this implies that no instruction
+
+can, through its execution, cause an exceptional halt. Also, the execution is in an exceptional halting state if the gas
+
+(159)
+
+**_µ_**g ≡ **_µ_**g − _C_(_*σ*, *µ*, A, I_)
+
+link:#_bookmark147[__J__JUMP](*_µ_*) if _w_ = JUMP
+
+left prior to executing an link:#_bookmark145[SSTORE] instruction is less than or equal to the call stipend link:#_bookmark134[_G_~callstipend~]. The last condition was introduced in EIP-1706 by link:#_bookmark96[Forshtat and Weiss [2019]]
+
+(160)
+
+**_µ_**pc ≡
+
+link:#_bookmark148[__J__JUMPI](*_µ_*) if _w_ = JUMPI
+
+__N__ (**_µ_**pc__, w__) otherwise
+
+(part of EIP-2200 by link:#_bookmark105[Tang] [link:#_bookmark105[2019]).]
+
+In general, we assume the memory, accrued substate
+
+and system state do not change:
+____
+
+[arabic, start=3]
+. _Jump Destination Validity._ We previously used _D_ as the function to determine the set of valid jump desti- nations given the code that is being run. We define this as any position in the code occupied by a JUMPDEST instruction.
+
+____
+(161)
+
+(162)
+
+(163)
+
+(164)
+
+*__µ__m* ≡ **__µ__m _µ_**i ≡ **_µ_**i
+
+_A_ ≡ _A_
+
+*_σ_* ≡ *_σ_*
+
+All such positions must be on valid instruction bound- aries, rather than sitting in the data portion of PUSH operations and must appear within the explicitly defined portion of the code (rather than in the implicitly defined link:#_bookmark143[STOP] operations that trail it).
+
+Formally:
+
+{empty}(151) _D_(*c*) ≡ __D__J(*c*_,_ 0) where:
+
+(152)
+
+\{} if _i_ ;;: ll**c**ll
+
+_D_ (*c*_, i_) \{_i_} ∪ __D__J(*c*_, N_ (_i,_ *c*[_i_]))
+
+if *c*[_i_] = JUMPDEST
+
+__D__J(*c*_, N_ (_i,_ *c*[_i_])) otherwise
+
+where _N_ is the next valid instruction position in the code, skipping the data of a PUSH instruction, if any: (153)
+
+__i__ + _w_ − PUSH1 + 2
+
+However, instructions do typically alter one or several components of these values. Altered components listed by instruction are noted in Appendix link:#Appendix_H._Virtual_Machine_Specificatio[H,] alongside values for _α_ and _δ_ and a formal description of the gas requirements.
+____
+
+[arabic, start=6]
+. {blank}
++
+____
+[#10._Blocktree_to_Blockchain .anchor]####Blocktree to Blockchain
+____
+
+____
+The canonical blockchain is a path from root to leaf through the entire block tree. In order to have consensus over which path it is, conceptually we identify the path that has had the most computation done upon it, or, the _heaviest_ path. Clearly one factor that helps determine the heaviest path is the block number of the leaf, equivalent to the number of blocks, not counting the unmined link:#_bookmark153[genesis] link:#_bookmark153[block,] in the path. The longer the path, the greater the total mining effort that must have been done in order to arrive at the leaf. This is akin to existing schemes, such as that employed in Bitcoin-derived protocols.
+
+Since a block header includes the difficulty, the header alone is enough to validate the computation done. Any
+
+_N_ (_i, w_) ≡
+
+if _w_ [PUSH1__,__ PUSH32]
+
+__i__ + 1 otherwise
+
+block contributes toward the total computation or _total difficulty_ of a chain.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 15
+
+as:
+____
+
+Thus we define the total difficulty of block _B_ recursively
+
+____
+If there are collisions of the beneficiary addresses be- tween ommers and the block (i.e. two ommers with the
+
+(165)
+
+(166)
+
+_B_~t~ ≡ _B_~t~ + _B_~d~ _B_ ≡ _P_ (__B__H)
+
+same beneficiary address or an ommer with the same bene- ficiary address as the present block), additions are applied [#_bookmark62 .anchor]####cumulatively.
+
+As such given a block _B_, __B__t is its total difficulty, _B_ is its parent block and _B_~d~ is its difficulty.
+
+We define the block reward in Wei: (176)
+____
+
+[arabic, start=11]
+. [#11._Block_Finalisation .anchor]####Block Finalisation
+
+____
+The process of finalising a block involves four stages:
+____
+
+[arabic]
+. Validate (or, if mining, determine) ommers;
+
+____
+__R__block = 1018 ×
+
+5 if __H__i __< F__Byzantium
+
+3 if __F__Byzantium __H__i __< F__Constantinople
+
+[#11.4._State_&_Nonce_Validation .anchor]####2 if __H__i ;;: __F__Constantinople
+____
+
+[arabic, start=2]
+. validate (or, if mining, determine) transactions;
+. apply rewards;
+. verify (or, if mining, compute a valid) state and link:#_bookmark17[block nonce.]
+
+____
+11.1. *Ommer Validation.* The validation of link:#_bookmark18[ommer] link:#_bookmark18[headers] means nothing more than verifying that each om- mer header is both a valid header and satisfies the relation
+
+of _N_ th-generation ommer to the present block where _N_ ≤ 6.
+
+The maximum of ommer headers is two. Formally:
+
+11.4. *State & Nonce Validation.* We may now define
+
+the function, Γ, that maps a block _B_ to its initiation state: (177)
+
+Γ(_B_) **_σ_**0 if _P_ (__B__H) = ∅
+
+**_σ_**i : link:#_bookmark118[TRIE](__L__S(**_σ_**i)) = _P_ (__B__H)Hr otherwise
+
+Here, TRIE(__L__S(**_σ_**i)) means the hash of the root node of a trie of state **_σ_**i; it is assumed that implementations will store this in the state database, which is trivial and efficient
+
+since the trie is by nature an immutable data structure.
+
+{empty}(167) ll__B__*~U~*
+____
+
+ll 2
+
+____
+**U**∈__B__*U*
+____
+
+link:#_bookmark35[_V_ (*U*]) ∧ _k_(*U*_, P_ (*B*
+
+*H*)*H*
+
+_,_ 6)
+
+____
+And finally we define Φ, the block transition function, which maps an incomplete block _B_ to a complete block _B_ :
+
+where _k_ denotes the “is-kin” property:
+
+(168)
+
+{empty}(178) Φ(_B_) ≡ _B_ : _B_ = _B_^∗^ except:
+
+_k_(_U, H, n_) ≡
+
+_false_ if _n_ = 0
+
+_s_(_U, H_)
+
+(179)
+
+_B_~n~ = _n_ : _x_
+
+2256
+
+link:#_bookmark31[_H_~d~]
+
+ ∨ _k_(_U, P_ (_H_)H__, n__ − 1) otherwise
+
+{empty}(180) _B_~m~ = _m_ with (_x, m_) = PoW(_B_link:#_bookmark34[n∗] _, n,_ *d*)
+
+(169)
+
+_s_(_U, H_) ≡ (_P_ (_H_) = _P_ (_U_ ) ∧ _H U_ ∧ _U_ ∈__/ B__(_H_)*~U~*)
+
+where _B_(_H_) and _P_ (_H_) are the block and the parent block of the corresponding header _H_ respectively.
+____
+
+[arabic, start=2]
+. *Transaction Validation.* The given *gasUsed* must correspond faithfully to the transactions listed: link:#_bookmark14[_B_~Hg~], the total gas used in the block, must be equal to the accumulated gas used according to the final transaction:
+
+____
+{empty}(170) link:#_bookmark14[__B__H]g = link:#_bookmark2[_.€_](link:#_bookmark22[*R*)u]
+____
+
+[arabic, start=3]
+. *Reward Application.* The application of rewards to a block involves raising the balance of the accounts of the beneficiary address of the block and each ommer by a certain amount. We raise the block’s beneficiary account by link:#_bookmark62[_R_~block~]; for each ommer, we raise the block’s beneficiary by an additional ^+++1+++^ of the block reward and the benefi- ciary of the ommer gets rewarded depending on the block numb[#_bookmark65 .anchor]####er. Formally we define the function Ω:
+
+____
+(171)
+
+Ω(_B, *σ*_) ≡ *_σ_* : *_σ_* = *_σ_* except:
+
+With *d* being a dataset as specified in Appendix link:#Appendix_J._Ethash[J.]
+
+As specified at the beginning of the present work, link:#_bookmark67[Π] is the state-transition function, which is defined in terms of link:#_bookmark65[Ω,] the block finalisation function and link:#_bookmark0[Υ,] the transaction- evaluation function, both now well-defined.
+
+As previously detailed, *R*[_n_]~z~, *R*[_n_]*~l~* and *R*[_n_]~u~ are the __n__th corresponding status code, logs and cumulative gas used after each transaction (*R*[_n_]~b~, the fourth component in the tuple, has already been defined in terms of the logs). We also define the __n__th state *_σ_*[_n_], which is defined simply as the state resulting from applying the corresponding
+
+transaction to the state resulting from the previous trans- action (or the block’s initial state in the case of the first such transaction):
+____
+
+{empty}(182) [#_bookmark66 .anchor]##*_σ_*[_n_] = link:#11.4._State_&_Nonce_Validation[Γ(]_B_) if _n <_ 0
+
+link:#_bookmark0[Υ(]*_σ_*[_n_ − 1]_, B_*~T~*[_n_]) otherwise
+
+____
+In the case of _B_*~R~*[_n_]~u~, we take a similar approach defin- ing each item as the gas used in evaluating the correspond- ing transaction summed with the previous item (or zero, if it is the first), giving us a running total:
+
+{empty}(172) *_σ_* [*B* ] = *_σ_*[*B* ] + (1 + ll**BU**ll _R_
+
+0 if _n <_ 0
+
+(173)
+
+∀**U** ∈ *B~U~* :
+
+ +**R**[_n_ − 1]u otherwise
+
+f∅ if *_σ_*[*U* ] = ∅ ∧ _R_ = 0
+
+For *R*[_n_]*~l~*, we utilise the link:#_bookmark42[Υ] function that we conve-
+
+*_σ_* [**U**c] =
+____
+
+c
+
+____
+*a* otherwise
+
+niently defined in the transaction execution function.
+
+{empty}(184) *R*[_n_]*~l~* = Υ**^l^**(*_σ_*[_n_ − 1]_, B_*~T~*[_n_])
+
+{empty}(174) *a* ≡ (*_σ_*[_U_~c~]~n~_, *σ*_[_U_~c~]~b~ + _R, *σ*_[_U_~c~]*~s~*_, *σ*_[_U_~c~]~c~)
+
+{empty}(175) _R_ ≡ (1 + +++1+++ (_U_ − _B_ ) _R_
+____
+
+block
+
+____
+We define link:#_bookmark42[*R*[_n_]z] in a similar manner.
+
+{empty}(185) *R*[_n_]~z~ = Υ^z^(*_σ_*[_n_ − 1]_, B_*~T~*[_n_])
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 16
+
+[#_bookmark67 .anchor]####Finally, we define Π as the new state given the block re- ward function link:#_bookmark65[Ω] applied to the final transaction’s resultant state, link:#_bookmark2[_.€_](*_σ_*):
+
+{empty}(186) Π(_*σ*, B_) ≡ Ω(_B, .€_(*_σ_*))
+
+Thus the complete block-transition mechanism is de- fined, except for PoW, the proof-of-work function.
+
+[#11.5._Mining_Proof-of-Work .anchor]####11.5. *Mining Proof-of-Work.* The mining proof-of- work (PoW) exists as a cryptographically secure nonce that proves beyond reasonable doubt that a particular amount of computation has been expended in the deter- mination of some token value _n_. It is utilised to enforce the blockchain security by giving meaning and credence to the notion of difficulty (and, by extension, total dif- ficulty). However, since mining new blocks comes with an attached reward, the proof-of-work not only functions as a method of securing confidence that the blockchain will remain canonical into the future, but also as a wealth distribution mechanism.
+
+For both reasons, there are two important goals of the proof-of-work function; firstly, it should be as accessible as possible to as many people as possible. The requirement of, or reward from, specialised and uncommon hardware should be minimised. This makes the distribution model as open as possible, and, ideally, makes the act of mining a simple swap from electricity to Ether at roughly the same rate for anyone around the world.
+
+Secondly, it should not be possible to make super-linear profits, and especially not so with a high initial barrier. Such a mechanism allows a well-funded adversary to gain a troublesome amount of the network’s total mining power and as such gives them a super-linear reward (thus skewing distribution in their favour) as well as reducing the network security.
+
+One plague of the Bitcoin world is ASICs. These are specialised pieces of compute hardware that exist only to do a single task link:#_bookmark98[(Smith [1997]).] In Bitcoin’s case the task is the SHA256 hash function link:#_bookmark84[(Courtois et al. [2014]).] While ASICs exist for a proof-of-work function, both goals are placed in jeopardy. Because of this, a proof-of-work func- tion that is ASIC-resistant (i.e. difficult or economically inefficient to implement in specialised compute hardware) has been identified as the proverbial silver bullet.
+
+Two directions exist for ASIC resistance; firstly make it sequential memory-hard, i.e. engineer the function such that the determination of the link:#_bookmark17[nonce] requires a lot of mem- ory and bandwidth such that the memory cannot be used in parallel to discover multiple nonces simultaneously. The second is to make the type of computation it would need to do general-purpose; the meaning of “specialised hardware” for a general-purpose task set is, naturally, general purpose hardware and as such commodity desktop computers are likely to be pretty close to “specialised hardware” for the task. For Ethereum 1.0 we have chosen the first path.
+
+More formally, the proof-of-work function takes the form of PoW:
+
+(187)
+
+256
+
+_m_ = link:#_bookmark16[__H__m] ∧ _n link:#_bookmark31[H]_ with (_m, n_) = PoW(link:#_bookmark34[__H__n]__, H__n__,__ *d*)
+
+Where __H__n is the new block’s header but _without_ the nonce and mix-hash components; __H__n is the nonce of the header; *d* is a large data set needed to compute the mix- Hash and _H_~d~ is the new block’s difficulty value (i.e. the
+
+block difficulty from section link:#10._Blocktree_to_Blockchain[10).] PoW is the proof-of-work function which evaluates to an array with the first item being the mixHash and the second item being a pseudo- random number cryptographically dependent on _H_ and *d*. The underlying algorithm is called Ethash and is described below.
+
+11.5.1. _Ethash._ Ethash is the PoW algorithm for Ethereum
+
+1.0. It is the latest version of Dagger-Hashimoto, intro- duced by link:#_bookmark78[Buterin] link:#_bookmark78[[2013b]] and link:#_bookmark90[Dryja] link:#_bookmark90[[2014],] although it can no longer appropriately be called that since many of the original features of both algorithms were drastically changed with R&D from February 2015 until May 4 2015 link:#_bookmark106[(Jentzsch] link:#_bookmark106[[2015]).] The general route that the algorithm takes is as follows:
+
+There exists a seed which can be computed for each block by scanning through the block headers up until that point. From the seed, one can compute a pseudorandom cache, link:#_bookmark155[_J_~cacheinit~] bytes in initial size. Light clients store the cache. From the cache, we can generate a dataset, link:#_bookmark156[_J_~datasetinit~] bytes in initial size, with the property that each item in the dataset depends on only a small number of items from the cache. Full clients and miners store the dataset. The dataset grows linearly with time.
+
+Mining involves grabbing random slices of the dataset and hashing them together. Verification can be done with low memory by using the cache to regenerate the specific pieces of the dataset that you need, so you only need to store the cache. The large dataset is updated once every
+
+link:#_bookmark157[_J_~epoch~] blocks, so the vast majority of a miner’s effort will be reading the dataset, not making changes to it. The
+
+mentioned parameters as well as the algorithm is explained in detail in Appendix link:#Appendix_J._Ethash[J.]
+____
+
+[arabic, start=12]
+. {blank}
++
+____
+Implementing Contracts
+____
+
+____
+There are several patterns of contracts engineering that allow particular useful behaviours; two of these that we will briefly discuss are data feeds and random numbers.
+____
+
+[arabic]
+. *Data Feeds.* A data feed contract is one which pro- vides a single service: it gives access to information from the external world within Ethereum. The accuracy and timeliness of this information is not guaranteed and it is the task of a secondary contract author—the contract that utilises the data feed—to determine how much trust can be placed in any single data feed.
+
+____
+The general pattern involves a single contract within Ethereum which, when given a message call, replies with some timely information concerning an external phenome- non. An example might be the local temperature of New York City. This would be implemented as a contract that returned that value of some known point in storage. Of course this point in storage must be maintained with the correct such temperature, and thus the second part of the pattern would be for an external server to run an Ethereum node, and immediately on discovery of a new block, creates a new valid transaction, sent to the contract, updating said value in storage. The contract’s code would accept such updates only from the identity contained on said server.
+____
+
+[arabic, start=2]
+. *Random Numbers.* Providing random numbers within a deterministic system is, naturally, an impossible task. However, we can approximate with pseudo-random numbers by utilising data which is generally unknowable
+
+____
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 17
+
+at the time of transacting. Such data might include the block’s hash, the block’s timestamp and the block’s benefi- ciary address. In order to make it hard for malicious miners to control those values, one should use the link:#_bookmark144[BLOCKHASH] operation in order to use hashes of the previous 256 blocks as pseudo-random numbers. For a series of such numbers, a trivial solution would be to add some constant amount and hashing the result.
+____
+
+[arabic, start=13]
+. {blank}
++
+____
+Future Directions
+____
+
+____
+The state database won’t be forced to maintain all past state link:#_bookmark118[trie] structures into the future. It should maintain an age for each node and eventually discard nodes that are neither recent enough nor checkpoints. Checkpoints, or a set of nodes in the database that allow a particular block’s state trie to be traversed, could be used to place a maximum limit on the amount of computation needed in order to retrieve any state throughout the blockchain.
+
+Blockchain consolidation could be used in order [#_bookmark70 .anchor]####to re- duce the amount of blocks a client would need to download to act as a full, mining, node. A compressed archive of the trie structure at given points in time (perhaps one in [#_bookmark69 .anchor]####every 10,000th block) could be maintained by the peer network, effectively recasting the link:#_bookmark153[genesis block.] This would reduce the amount to be downloaded to a single archive [#_bookmark71 .anchor]####plus a hard maximum limit of blocks.
+
+Finally, blockchain compression could perhaps be con- ducted: nodes in state trie that haven’t sent/receiv[#_bookmark72 .anchor]####ed a transaction in some constant amount of blocks could be thrown out, reducing both Ether-leakage and the growth of the state database.
+
+13.1. *Scalability.* Scalability remains an eternal [#_bookmark75 .anchor]####concern. With a generalised state transition function, it becomes dif- ficult to partition and parallelise transactions to apply the divide-and-conquer strategy. Unaddressed, the [#_bookmark74 .anchor]####dynamic value-range of the system remains essentially fixed and as the average transaction value increases, the less valuable of them become ignored, being economically pointless to in- clude in the main ledger. However, several strategies [#_bookmark73 .anchor]####exist that may potentially be exploited to provide a considerably more scalable protocol.
+
+Some form of hierarchical structure, achieved by either consolidating smaller lighter-weight chains into the [#_bookmark78 .anchor]####main block or building the main block through the incremen- tal combination and adhesion (through proof-of-work) of smaller transaction sets may allow parallelisation of [#_bookmark76 .anchor]####trans- action combination and block-building. Parallelism could also come from a prioritised set of parallel blockc[#_bookmark77 .anchor]####hains, consolidating each block and with duplicate or invalid transactions thrown out accordingly.
+
+Finally, verifiable computation, if made generally a[#_bookmark79 .anchor]####vail- able and efficient enough, may provide a route to allow the proof-of-work to be the verification of final state.
+____
+
+[arabic, start=14]
+. {blank}
++
+____
+Conclusion
+____
+
+____
+We have introduced, discussed and formally defined[#_bookmark81 .anchor]#### [#_bookmark82 .anchor]####the protocol of Ethereum. Through this protocol the reader may implement a node on the Ethereum network and [#_bookmark80 .anchor]####join others in a decentralised secure social operating system. Contracts may be authored in order to algorithmically specify and autonomously enforce rules of interaction.
+____
+
+[arabic, start=15]
+. {blank}
++
+____
+Acknowledgements
+____
+
+____
+Many thanks to Aeron Buchanan for authoring the _Homestead_ revisions, Christoph Jentzsch for authoring the Ethash algorithm and Yoichi Hirai for doing most of the EIP-150 changes. Important maintenance, useful correc- tions and suggestions were provided by a number of others from the Ethereum DEV organisation and Ethereum com- munity at large including Gustav Simonsson, Pawelw Bylica, Jutta Steiner, Nick Savers, Viktor Tr´on, Marko Simovic, Giacomo Tazzari and, of course, Vitalik Buterin.
+____
+
+[arabic, start=16]
+. {blank}
++
+____
+Availability
+____
+
+____
+The source of this paper is maintained at https://github.com/ethereum/yellowpaper/[https:]
+
+https://github.com/ethereum/yellowpaper/[//github.com/ethereum/yellowpaper/]. An auto- generated PDF is located at https://ethereum.github.io/yellowpaper/paper.pdf[https://ethereum.github.] https://ethereum.github.io/yellowpaper/paper.pdf[io/yellowpaper/paper.pdf].
+
+References
+
+Jacob Aron. BitCoin software finds new life. _New Scientist_, 213(2847):20, 2012. URL http://www.sciencedirect.com/science/article/pii/S0262407912601055[http://www.sciencedirect.] http://www.sciencedirect.com/science/article/pii/S0262407912601055[com/science/article/pii/S0262407912601055].
+
+Adam Back. Hashcash - Amortizable Publicly Auditable
+
+Cost-Functions, 2002. URL http://www.hashcash.org/papers/amortizable.pdf[http://www.hashcash.org/] http://www.hashcash.org/papers/amortizable.pdf[papers/amortizable.pdf].
+
+Tim Beiko, James Hancock, and Thomas Jay Rush. EIP- 4345: Difficulty bomb delay to June 2022, October 2021a. URL https://eips.ethereum.org/EIPS/eip-4345.
+
+Tim Beiko et al. Berlin network upgrade specifica-
+
+tion, 2021b. URL https://github.com/ethereum/eth1.0-specs/blob/master/network-upgrades/mainnet-upgrades/berlin.md[https://github.com/ethereum/] https://github.com/ethereum/eth1.0-specs/blob/master/network-upgrades/mainnet-upgrades/berlin.md[eth1.0-specs/blob/master/network-upgrades/] https://github.com/ethereum/eth1.0-specs/blob/master/network-upgrades/mainnet-upgrades/berlin.md[mainnet-upgrades/berlin.md].
+
+Guido Bertoni, Joan Daemen, Michal Peeters, and Gilles Van Assche. The KECCAK SHA-3 sub- mission, 2011. URL https://keccak.team/files/Keccak-submission-3.pdf[https://keccak.team/files/]
+
+https://keccak.team/files/Keccak-submission-3.pdf[Keccak-submission-3.pdf].
+
+Roman Boutellier and Mareike Heinzen. Pirates, Pio- neers, Innovators and Imitators. In _Growth Through Innovation_, pages 85–96. Springer, 2014. URL https://www.springer.com/gb/book/9783319040158[https:]
+
+https://www.springer.com/gb/book/9783319040158[//www.springer.com/gb/book/9783319040158].
+
+Vitalik Buterin. Ethereum: A Next-Generation Smart Contract and Decentralized Application Platform,
+
+2013a. URL https://github.com/ethereum/wiki/wiki/White-Paper[https://github.com/ethereum/wiki/] https://github.com/ethereum/wiki/wiki/White-Paper[wiki/White-Paper].
+
+Vitalik Buterin. Dagger: A Memory-Hard to Compute, Memory-Easy to Verify Scrypt Alternative, 2013b. URL http://www.hashcash.org/papers/dagger.html.
+
+Vitalik Buterin. EIP-2: Homestead hard-fork changes,
+
+{empty}2015. URL https://eips.ethereum.org/EIPS/eip-2. Vitalik Buterin. EIP-100: Change difficulty adjustment to target mean block time including uncles, April 2016a.
+
+URL https://eips.ethereum.org/EIPS/eip-100. Vitalik Buterin. EIP-155: Simple replay attack protec-
+
+tion, October 2016b. URL https://eips.ethereum.org/EIPS/eip-155[https://eips.ethereum.] https://eips.ethereum.org/EIPS/eip-155[org/EIPS/eip-155].
+
+Vitalik Buterin. EIP-1014: Skinny CREATE2, April 2018. URL https://eips.ethereum.org/EIPS/eip-1014.
+____
+
+Vitalik Buterin and Martin Swende. EIP-2929: Gas cost in-
+
+creases for state access opcodes, September 2020a. URL
+
+____
+https://eips.ethereum.org/EIPS/eip-2929.
+
+Vitalik Buterin and Martin Swende. EIP-2930: Optional ac- cess lists, August 2020b. URL https://eips.ethereum.org/EIPS/eip-2930[https://eips.ethereum.] https://eips.ethereum.org/EIPS/eip-2930[org/EIPS/eip-2930].
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 18
+
+[#_bookmark83 .anchor]####Eric Conner. EIP-2384: Muir Glacier difficulty b[#_bookmark85 .anchor]####omb delay, November 2019. URL https://eips.ethereum.org/EIPS/eip-2384[https://eips.ethereum.] https://eips.ethereum.org/EIPS/eip-2384[[#_bookmark84 .anchor]####org/EIPS/eip-2384].
+
+Nicolas T. Courtois, Marek Grajek, and Rahul [#_bookmark86 .anchor]####Naik.
+
+_Optimizing SHA256 in Bitcoin Mining_, pages 131–
+
+{empty}144. Springer Berlin Heidelberg, Berlin, Heidel- berg, 2014. ISBN 978-3-662-44893-9. doi: 10. 1007/978-3-662-44893-9 12. URL https://doi.org/10.1007/978-3-662-44893-9_12[[#_bookmark87 .anchor]####https://doi.org/10.] https://doi.org/10.1007/978-3-662-44893-9_12[[#_bookmark88 .anchor]####1007/978-3-662-44893-9_12].
+
+B.A. Davey and H.A. Priestley. _Introduction to lattices and order. 2nd ed._ Cambridge: Cambridge Univ[#_bookmark89 .anchor]####ersity [#_bookmark90 .anchor]####Press, 2nd ed. edition, 2002. ISBN 0-521-78451-4/pbk. Thaddeus Dryja. Hashimoto: I/O bound proof of work, 2014. URL http://diyhpl.us/~bryan/papers2/bitcoin/meh/hashimoto.pdf[http://diyhpl.us/~bryan/papers2/]
+
+bitcoin/meh/hashimoto.pdf.
+
+Cynthia Dwork and Moni Naor. Pricing via [#_bookmark92 .anchor]####pro- cessing or combatting junk mail. In _In 12th An- nual International Cryptology Conference_, pages 139– 147, 1992. URL http://www.wisdom.weizmann.ac.il/~naor/PAPERS/pvp.pdf[http://www.wisdom.weizmann.ac.il/]
+
+~naor/PAPERS/pvp.pdf.
+
+Dankrad Feist, Dmitry Khovratovich, and Marius van [#_bookmark94 .anchor]####der
+
+Wijden. EIP-3607: Reject transactions from senders with deployed code, June 2021. URL https://eips.ethereum.org/EIPS/eip-3607[[#_bookmark95 .anchor]####https://eips.] https://eips.ethereum.org/EIPS/eip-3607[[#_bookmark96 .anchor]####ethereum.org/EIPS/eip-3607].
+
+Alex Forshtat and Yoav Weiss. EIP-1706: Disable sstore
+
+with gasleft lower than call stipend, 2019. URL https://eips.ethereum.org/EIPS/eip-1706[https:]
+
+//eips.ethereum.org/EIPS/eip-1706.
+
+Phong Vo Glenn Fowler, Landon Curt Noll. Fo[#_bookmark98 .anchor]####wlerNol- lVo hash function, 1991. URL http://www.isthe.com/chongo/tech/comp/fnv/index.html[http://www.isthe.com/] http://www.isthe.com/chongo/tech/comp/fnv/index.html[[#_bookmark99 .anchor]####chongo/tech/comp/fnv/index.html].
+
+Nils Gura, Arun Patel, Arvinderpal Wander, Hans Eb[#_bookmark100 .anchor]####erle,
+
+and Sheueling Chang Shantz. Comparing elliptic curve cryptography and RSA on 8-bit CPUs. In _Cryptographic Hardware and Embedded Systems-CHES 2004_, [#_bookmark101 .anchor]####pages 119–132. Springer, 2004. URL https://www.iacr.org/archive/ches2004/31560117/31560117.pdf[https://www.iacr.org/] https://www.iacr.org/archive/ches2004/31560117/31560117.pdf[[#_bookmark102 .anchor]####archive/ches2004/31560117/31560117.pdf].
+
+James Hancock. EIP-3554: Difficulty bomb delay to De- cember 2021, May 2021. URL https://eips.ethereum.org/EIPS/eip-3554[[#_bookmark103 .anchor]####https://eips.ethereum.] https://eips.ethereum.org/EIPS/eip-3554[[#_bookmark104 .anchor]####org/EIPS/eip-3554].
+
+Tjaden Hess, Matt Luongo, Piotr Dyraga, and James
+
+Hancock. EIP-152: Add BLAKE2 compression func- tion ‘F‘ precompile, October 2016. URL https://eips.ethereum.org/EIPS/eip-152[[#_bookmark105 .anchor]####https://eips.] https://eips.ethereum.org/EIPS/eip-152[[#_bookmark106 .anchor]####ethereum.org/EIPS/eip-152].
+
+Christoph Jentzsch. Commit date for ethash, 2015. URL
+
+https://github.com/ethereum/yellowpaper/commit/ https://github.com/ethereum/yellowpaper/commit/77a8cf2428ce245bf6e2c39c5e652ba58a278666#commitcomment-24644869[77a8cf2428ce245bf6e2c39c5e652ba58a278666#] https://github.com/ethereum/yellowpaper/commit/77a8cf2428ce245bf6e2c39c5e652ba58a278666#commitcomment-24644869[[#_bookmark108 .anchor]####commitcomment-24644869].
+
+Don Johnson, Alfred Menezes, and Scott Van- stone. The Elliptic Curve Digital [#_bookmark109 .anchor]####Signa- ture Algorithm (ECDSA), 2001. URL https:
+
+//web.archive.org/web/20170921160141/http://
+
+cs.ucsb.edu/~koc/ccs130h/notes/ecdsa-[#_bookmark110 .anchor]####cert.pdf. Accessed 21 September 2017, but the original link was
+
+inaccessible on 19 October 2017. Refer to section 6.2 for ECDSAPUBKEY, and section 7 for ECDSASIGN and
+
+ECDSARECOVER.
+
+Sergio Demian Lerner. Strict Memory Hard Hashing Func- tions, 2014. URL http://www.hashcash.org/papers/memohash.pdf[http://www.hashcash.org/papers/] http://www.hashcash.org/papers/memohash.pdf[memohash.pdf].
+
+Mark Miller. The Future of Law. In _pa-_
+
+_per delivered at the Extro 3 Conference (August 9)_, 1997. URL https://drive.google.com/file/d/0Bw0VXJKBgYPMS0J2VGIyWWlocms/edit?usp=sharing[https://drive.google.com/file/d/] https://drive.google.com/file/d/0Bw0VXJKBgYPMS0J2VGIyWWlocms/edit?usp=sharing[0Bw0VXJKBgYPMS0J2VGIyWWlocms/edit?usp=sharing].
+
+Satoshi Nakamoto. Bitcoin: A peer-to-peer electronic cash
+
+system, 2008. URL http://www.bitcoin.org/bitcoin.pdf[http://www.bitcoin.org/bitcoin.] http://www.bitcoin.org/bitcoin.pdf[pdf].
+
+Meni Rosenfeld, Yoni Assia, Vitalik Buterin, m li- orhakiLior, Oded Leiba, Assaf Shomer, and Eli- ran Zach. Colored Coins Protocol Specification, 2012. URL https://github.com/Colored-Coins/Colored-Coins-Protocol-Specification[https://github.com/Colored-Coins/]
+
+https://github.com/Colored-Coins/Colored-Coins-Protocol-Specification[Colored-Coins-Protocol-Specification].
+
+Markku-Juhani Saarinen and Jean-Philippe Aumasson. RFC 7693: The BLAKE2 cryptographic hash and mes- sage authentication code (MAC), November 2015. URL https://tools.ietf.org/html/rfc7693.
+
+Afri Schoedon. EIP-1234: Constantinople difficulty bomb
+
+delay and block reward adjustment, 2018. URL https://eips.ethereum.org/EIPS/eip-1234[https:]
+
+https://eips.ethereum.org/EIPS/eip-1234[//eips.ethereum.org/EIPS/eip-1234].
+
+Afri Schoedon and Vitalik Buterin. EIP-649: Metropo- lis difficulty bomb delay and block reward reduction, June 2017. URL https://eips.ethereum.org/EIPS/eip-649[https://eips.ethereum.org/EIPS/]
+
+https://eips.ethereum.org/EIPS/eip-649[eip-649].
+
+Michael John Sebastian Smith. _Application-Specific Integrated Circuits_. Addison-Wesley, 1997. ISBN 0201500221.
+
+Yonatan Sompolinsky and Aviv Zohar. Accelerating bit- coin’s transaction processing. fast money grows on trees, not chains, 2013. URL https://eprint.iacr.org/2013/881[https://eprint.iacr.org/]
+
+https://eprint.iacr.org/2013/881[2013/881].
+
+Simon Sprankel. Technical Basis of Digital Currencies, 2013. URL http://www.coderblog.de/wp-content/uploads/technical-basis-of-digital-currencies.pdf[http://www.coderblog.de/wp-content/] http://www.coderblog.de/wp-content/uploads/technical-basis-of-digital-currencies.pdf[uploads/technical-basis-of-digital-currencies.] http://www.coderblog.de/wp-content/uploads/technical-basis-of-digital-currencies.pdf[pdf].
+
+Nick Szabo. Formalizing and securing relation-
+
+ships on public networks. _First Monday_, 2(9), 1997. URL http://firstmonday.org/ojs/index.php/fm/article/view/548[http://firstmonday.org/ojs/index.php/] http://firstmonday.org/ojs/index.php/fm/article/view/548[fm/article/view/548].
+
+Wei Tang. EIP-2200: Structured definitions for net gas me-
+
+tering, 2019. URL https://eips.ethereum.org/EIPS/eip-2200[https://eips.ethereum.org/EIPS/] https://eips.ethereum.org/EIPS/eip-2200[eip-2200].
+
+Vivek Vishnumurthy, Sangeeth Chandrakumar, and Emin Gn Sirer. KARMA: A secure economic framework for peer-to-peer resource sharing, 2003. URL https://www.cs.cornell.edu/people/egs/papers/karma.pdf[https://]
+
+https://www.cs.cornell.edu/people/egs/papers/karma.pdf[www.cs.cornell.edu/people/egs/papers/karma.pdf].
+
+J. R. Willett. MasterCoin Complete Specification, 2013. URL https://github.com/mastercoin-MSC/spec.
+
+Micah Zoltu. EIP-2718: Typed transaction envelope,
+
+June 2020. URL https://eips.ethereum.org/EIPS/eip-2718[https://eips.ethereum.org/EIPS/] https://eips.ethereum.org/EIPS/eip-2718[eip-2718].
+
+[#Appendix_A._Terminology .anchor]####Appendix A. Terminology
+
+*External Actor:* A person or other entity able to interface to an Ethereum node, but external to the world of Ethereum. It can interact with Ethereum through depositing signed Transactions and inspecting the blockchain and associated state. Has one (or more) intrinsic Accounts.
+
+*Address:* A 160-bit code used for identifying Accounts.
+
+*Account:* Accounts have an intrinsic balance and transaction count maintained as part of the Ethereum state. They also have some (possibly empty) EVM Code and a (possibly empty) Storage State associated with them.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 19
+
+Though homogenous, it makes sense to distinguish between two practical types of account: those with empty associated EVM Code (thus the account balance is controlled, if at all, by some external entity) and those with non-empty associated EVM Code (thus the account represents an Autonomous Object). Each Account has a single Address that identifies it.
+
+*Transaction:* A piece of data, signed by an External Actor. It represents either a Message or a new Autonomous Object. Transactions are recorded into each block of the blockchain.
+
+*Autonomous Object:* A notional object existent only within the hypothetical state of Ethereum. Has an intrinsic address and thus an associated account; the account will have non-empty associated EVM Code. Incorporated only as the Storage State of that account.
+
+*Storage State:* The information particular to a given Account that is maintained between the times that the Account’s associated EVM Code runs.
+
+*Message:* Data (as a set of bytes) and Value (specified as Ether) that is passed between two Accounts, either through the deterministic operation of an Autonomous Object or the cryptographically secure signature of the Transaction.
+
+*Message Call:* The act of passing a message from one Account to another. If the destination account is associated with non-empty EVM Code, then the VM will be started with the state of said Object and the Message acted upon. If the message sender is an Autonomous Object, then the Call passes any data returned from the VM operation.
+
+*Gas:* The fundamental network cost unit. Paid for exclusively by Ether (as of PoC-4), which is converted freely to and from Gas as required. Gas does not exist outside of the internal Ethereum computation engine; its price is set by the Transaction and miners are free to ignore Transactions whose Gas price is too low.
+
+*Contract:* Informal term used to mean both a piece of EVM Code that may be associated with an Account or an Autonomous Object.
+
+*Object:* Synonym for Autonomous Object.
+
+*App:* An end-user-visible application hosted in the Ethereum Browser.
+
+*Ethereum Browser:* (aka Ethereum Reference Client) A cross-platform GUI of an interface similar to a simplified browser (a la Chrome) that is able to host sandboxed applications whose backend is purely on the Ethereum protocol.
+
+*Ethereum Virtual Machine:* (aka EVM) The virtual machine that forms the key part of the execution model for an Account’s associated EVM Code.
+
+*Ethereum Runtime Environment:* (aka ERE) The environment which is provided to an Autonomous Object executing in the EVM. Includes the EVM but also the structure of the world state on which the EVM relies for certain I/O instructions including CALL & CREATE.
+
+*EVM Code:* The bytecode that the EVM can natively execute. Used to formally specify the meaning and ramifications of a message to an Account.
+
+*EVM Assembly:* The human-readable form of EVM-code.
+
+*LLL:* The Lisp-like Low-level Language, a human-writable language used for authoring simple contracts and general low-level language toolkit for trans-compiling to.
+
+[#Appendix_B._Recursive_Length_Prefix .anchor]####Appendix B. Recursive Length Prefix
+
+[#_bookmark113 .anchor]####This is a serialisation method for encoding arbitrarily structured binary data (byte arrays). We define the set of possible structures T:
+
+(188)
+
+(189)
+
+(190)
+
+T ≡ L \± B
+
+L ≡ \{*t* : *t* = (*t*[0]_,_ *t*[1]_, ..._) ∧ ∀__n <__ ll**t**ll : *t*[_n_] ∈ T}
+
+B ≡ \{*b* : *b* = (*b*[0]_,_ *b*[1]_, ..._) ∧ ∀__n <__ ll**b**ll : *b*[_n_] ∈ O}
+
+Where O is the set of (8-bit) bytes. Thus B is the set of all sequences of bytes (otherwise known as byte arrays, and a leaf if imagined as a tree), L is the set of all tree-like (sub-)structures that are not a single leaf (a branch node if imagined as a tree) and T is the set of all byte arrays and such structural sequences. The disjoint union \± is needed only
+
+to distinguish the empty byte array () ∈ B from the empty list () ∈ L, which are encoded differently as defined below; as
+
+common, we will abuse notation and leave the disjoint union indices implicit, inferable from context.
+
+We define the RLP function as RLP through two sub-functions, the first handling the instance when the value is a byte array, the second when it is a sequence of further values:
+
+{empty}(191) RLP(*x*) __R__b(*x*) if *x* ∈ B
+
+_R_~l~(*x*) otherwise
+
+If the value to be serialised is a byte array, the RLP serialisation takes one of three forms:
+____
+
+* If the byte array contains solely a single byte and that single byte is less than 128, then the input is exactly equal to the output.
+* If the byte array contains fewer than 56 bytes, then the output is equal to the input prefixed by the byte equal to the length of the byte array plus 128.
+
+____
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 20
+____
+
+* Otherwise, the output is equal to the input, provided that it contains fewer than 2 bytes, prefixed by the
+
+____
+minimal-length byte array which when interpreted as a big-endian integer is equal to the length of the input byte
+
+array, which is itself prefixed by the number of bytes required to faithfully encode this length value plus 183.
+
+Byte arrays containing 2^64^ or more bytes cannot be encoded. This restriction ensures that the first byte of the encoding [#_bookmark114 .anchor]####of a byte array is always below 192, and thus it can be readily distinguished from the encodings of sequences in L.
+
+Formally, we define _R_~b~:
+
+(192)
+
+[#_bookmark115 .anchor]##_R_~b~(*x*) ≡
+
+*x* if ll**x**ll = 1 ∧ *x*[0] _<_ 128
+
+(128 + ll**x**ll) · *x* else if ll**x**ll _<_ 56
+
+∅ otherwise
+
+*b* −1
+
+(193)
+
+BE(_x_) ≡ (__b__0__, b__1__, ...__) : __b__0
+
+0 ∧ _x_ =
+
+_n_ =0
+
+_bn_ · 256 *b* −1−__n__
+
+{empty}(194) (__x__1__, ..., xn__) · (__y__1__, ..., ym__) = (__x__1__, ..., xn, y__1__, ..., ym__)
+
+Thus BE is the function that expands a non-negative integer value to a big-endian byte array of minimal length and the dot operator performs sequence concatenation.
+
+If instead, the value to be serialised is a sequence of other items then the RLP serialisation takes one of two forms:
+____
+
+* If the concatenated serialisations of each contained item is less than 56 bytes in length, then the output is equal to that concatenation prefixed by the byte equal to the length of this byte array plus 192.
+* Otherwise, the output is equal to the concatenated serialisations, provided that they contain fewer than 2 bytes,
+
+____
+prefixed by the minimal-length byte array which when interpreted as a big-endian integer is equal to the length
+
+of the concatenated serialisations byte array, which is itself prefixed by the number of bytes required to faithfully encode this length value plus 247.
+
+Sequences whose concatenated serialized items contain 2^64^ or more bytes cannot be encoded. This restriction ensures [#_bookmark116 .anchor]####that the first byte of the encoding does not exceed 255 (otherwise it would not be a byte).
+
+Thus we finish by formally defining _R_~l~:
+
+(195)
+
+_R_~l~(*x*) ≡
+
+247 + BE(ll__s__(*x*)ll) · BE(ll__s__(*x*)ll) · _s_(*x*) else if _s_(*x*) = ∅ ∧ ll__s__(*x*)ll _<_ 2^64^
+
+f
+
+If RLP is used to encode a scalar, defined only as a non-negative integer (in N, or in N__x__ for any _x_), it must be encoded as the shortest byte array whose big-endian interpretation is the scalar. Thus the RLP of some non-negative integer _i_ is defined as:
+
+{empty}(197) RLP(_i_ : _i_ ∈ N) ≡ RLP(BE(_i_))
+
+When interpreting RLP data, if an expected fragment is decoded as a scalar and leading zeroes are found in the byte sequence, clients are required to consider it non-canonical and treat it in the same manner as otherwise invalid RLP data, dismissing it completely.
+
+There is no specific canonical encoding format for signed or floating-point values.
+
+Appendix C. Hex-Prefix Encoding
+
+Hex-prefix encoding is an efficient method of encoding an arbitrary number of nibbles as a byte array. It is able to store an additional flag which, when used in the context of the trie (the only context in which it is used), disambiguates between node types.
+
+It is defined as the function HP which maps from a sequence of nibbles (represented by the set Y) together with a boolean value to a sequence of bytes (represented by the set B):
+
+(198)
+
+HP(*x*_, t_) : *x* Y (16__f__ (_t_)_,_ 16**x**[0] + *x*[1]_,_ 16**x**[2] + *x*[3]_, ..._) if ll**x**ll is even
+
+(16(_f_ (_t_) + 1) + *x*[0]_,_ 16**x**[1] + *x*[2]_,_ 16**x**[3] + *x*[4]_, ..._) otherwise
+
+(199)
+
+_f_ (_t_) ≡ f2 if _t_ 0
+
+0 otherwise
+
+Thus the high nibble of the first byte contains two flags; the lowest bit encoding the oddness of the length and the second-lowest encoding the flag _t_. The low nibble of the first byte is zero in the case of an even number of nibbles and the first nibble in the case of an odd number. All remaining nibbles (now an even number) fit properly into the remaining bytes.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 21
+
+[#Appendix_D._Modified_Merkle_Patricia_Tre .anchor]####Appendix D. Modified Merkle Patricia Tree
+
+[#_bookmark118 .anchor]####The modified Merkle Patricia tree (trie) provides a persistent data structure to map between arbitrary-length binary data (byte arrays). It is defined in terms of a mutable data structure to map between 256-bit binary fragments and arbitrary-length binary data, typically implemented as a database. The core of the trie, and its sole requirement in terms of the protocol specification, is to provide a single value that identifies a given set of key-value pairs, which may be either a 32-byte sequence or the empty byte sequence. It is left as an implementation consideration to store and maintain the structure of the trie in a manner that allows effective and efficient realisation of the protocol.
+
+Formally, we assume the input value I, a set containing pairs of byte sequences with unique keys:
+
+{empty}(200) I = \{(**k**0 ∈ B__,__ **v**0 ∈ B)_,_ (**k**1 ∈ B__,__ **v**1 ∈ B)_,_ }
+
+When considering such a sequence, we use the common numeric subscript notation to refer to a tuple’s key or value, thus:
+
+{empty}(201) ∀__I__ ∈ I : _I_ ≡ (__I__0__, I__1)
+
+Any series of bytes may also trivially be viewed as a series of nibbles, given an endian-specific notation; here we assume big-endian. Thus:
+
+(202)
+
+(203)
+
+∀__n__ : ∀__i <__ 2ll**k**_n_
+
+_y_(I) = \{(*k*~0~ ∈ Y__,__ *v*~0~ ∈ B)_,_ (*k*~1~ ∈ Y__,__ *v*~1~ ∈ B)_, ..._}
+
+*k*_n_[_i_ 2] 16 if _i_ is even
+
+_n_
+
+*k*_n_[l__i__ ÷ 2J] mod 16 otherwise
+
+We define the function TRIE, which evaluates to the root of the trie that represents this set when encoded in this structure:
+
+{empty}(204) TRIE(I) ≡ KEC RLP(_c_(I__,__ 0))
+
+We also assume a function _n_, the trie’s node cap function. When composing a node, we use RLP to encode the structure. As a means of reducing storage complexity, we store nodes whose composed RLP is fewer than 32 bytes directly; for those larger we assert prescience of the byte array whose Keccak-256 hash evaluates to our reference. Thus we define in terms of _c_, the node composition function:
+____
+
+() if I = ∅
+
+KEC RLP(_c_(I__, i__)) otherwise
+
+____
+In a manner similar to a radix tree, when the trie is traversed from root to leaf, one may build a single key-value pair. The key is accumulated through the traversal, acquiring a single nibble from each branch node (just as with a radix tree). Unlike a radix tree, in the case of multiple keys sharing the same prefix or in the case of a single key having a unique suffix, two optimising nodes are provided. Thus while traversing, one may potentially acquire multiple nibbles from each of the other two node types, extension and leaf. There are three kinds of nodes in the trie:
+
+*Leaf:* A two-item structure whose first item corresponds to the nibbles in the key not already accounted for by the accumulation of keys and branches traversed from the root. The hex-prefix encoding method is used and the second parameter to the function is required to be 1.
+
+*Extension:* A two-item structure whose first item corresponds to a series of nibbles of size greater than one that are shared by at least two distinct keys past the accumulation of the keys of nibbles and the keys of branches as traversed from the root. The hex-prefix encoding method is used and the second parameter to the function is required to be 0.
+
+*Branch:* A 17-item structure whose first sixteen items correspond to each of the sixteen possible nibble values for the keys at this point in their traversal. The 17th item is used in the case of this being a terminator node and thus a key being ended at this point in its traversal.
+
+A branch is then only used when necessary; no branch nodes may exist that contain only a single non-zero entry. We may formally define this structure with the structural composition function _c_:
+
+HP(_I_ [_i.._( _I_ 1)]_,_ 1)_, I_ if I = 1 where _I_ : _I_ I
+
+HP(__I__0[_i.._(_j_ − 1)]_,_ 0)_, n_(I__, j__) if _i_ = _j_ where _j_ = max\{_x_ : ∃**l** : ll**l**ll = _x_ ∧ ∀__I__ ∈ I : __I__0[0__..__(_x_ − 1)] = *l*}
+
+{empty}(206) _c_(I__, i__) ≡ **(_u_(0)_, u_(1)_, ..., u_(15)_, v_) otherwise where _u_(_j_) ≡ __n__f(\{_I_ : _I_ ∈ I ∧ __I__0[_i_] = _j_}_, i_ + 1)
+
+D.1. *Trie Database.* Thus no explicit assumptions are made concerning what data is stored and what is not, since that is an implementation-specific consideration; we simply define the identity function mapping the key-value set I to a 32-byte hash and assert that only a single such hash exists for any I, which though not strictly true is accurate within acceptable precision given the Keccak hash’s collision resistance. In reality, a sensible implementation will not fully recompute the trie root hash for each set.
+
+A reasonable implementation will maintain a database of nodes determined from the computation of various tries or, more formally, it will memoise the function _c_. This strategy uses the nature of the trie to both easily recall the contents of
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 22
+
+any previous key-value set and to store multiple such sets in a very efficient manner. Due to the dependency relationship, Merkle-proofs may be constructed with an _O_(log _N_ ) space requirement that can demonstrate a particular leaf must exist within a trie of a given root hash.
+
+[#Appendix_E._Precompiled_Contracts .anchor]####Appendix E. Precompiled Contracts
+
+For each precompiled contract, we make use of a template function, ΞPRE, which implements the out-of-gas checking.
+
+{empty}(207) [#_bookmark120 .anchor]####Ξ
+____
+
+PRE
+
+(_*σ*, g, A, I_) (∅__,__ 0__, A,__ ()) if __g < g__r
+
+(_*σ*, g_ − __g__r__, A,__ *o*) otherwise
+
+____
+The precompiled contracts each use these definitions and provide specifications for the *o* (the output data) and __g__r, the gas requirements.
+
+We define ΞECREC as a precompiled contract for the elliptic curve digital signature algorithm (ECDSA) public key recovery function (ecrecover). See Appendix link:#Appendix_F._Signing_Transactions[F] for the definition of the function ECDSARECOVER. We also define *d* to be the input data, well-defined for an infinite length by appending zeroes as required. In the case of an invalid signature (ECDSARECOVER(_h, v, r, s_) = ∅), we return no output.
+
+(208)
+
+(209)
+
+(210)
+
+ΞECREC ≡ ΞPRE where:
+
+__g__r = 3000
+
+*o* = 0 if ECDSARECOVER(_h, v, r, s_) = ∅
+
+32 otherwise
+
+(211)
+
+(212)
+
+(213)
+
+(214)
+
+if ll**o**ll = 32 :
+
+*o*[0__..__11] = 0
+
+*o*[12__..__31] = KEC ECDSARECOVER(_h, v, r, s_) [12__..__31] where:
+
+*d*[0__..__(lllink:#_bookmark54[_I_*~d~*]ll − 1)] = _I_*~d~*
+____
+
+[width="100%",cols="35%,39%,7%,19%",options="header",]
+|===
+a|
+____
+(215)
+____
+
+|*d*[ll__I__**~d~**ll__..__] |= a|
+____
+(0__,__ 0__, ...__)
+____
+
+a|
+____
+(216)
+____
+
+|_h_ |= a|
+____
+*d*[0__..__31]
+____
+
+a|
+____
+(217)
+____
+
+|_v_ |= a|
+____
+*d*[32__..__63]
+____
+
+a|
+____
+(218)
+____
+
+|_r_ |= a|
+____
+*d*[64__..__95]
+____
+
+a|
+____
+(219)
+____
+
+|_s_ |= a|
+____
+*d*[96__..__127]
+____
+
+|===
+
+____
+We define ΞSHA256 and ΞRIP160 as precompiled contracts implementing the SHA2-256 and RIPEMD-160 hash functions respectively. Their gas usage is dependent on the input data size, a factor rounded up to the nearest number of words.
+
+{empty}(220) ΞSHA256 ≡ ΞPRE where:
+
+(221)
+
+_g_ = 60 + 12 +++ll__I__**d**ll+++
+
+32
+
+{empty}(222) *o*[0__..__31] = SHA256(_I_*~d~*)
+
+{empty}(223) ΞRIP160 ≡ ΞPRE where:
+
+(224)
+
+_g_ = 600 + 120 +++ll__I__**d**ll+++
+
+32
+
+{empty}(225) *o*[0__..__11] = 0
+
+{empty}(226) *o*[12__..__31] = RIPEMD160(_I_*~d~*)
+
+For the purposes here, we assume we have well-defined standard cryptographic functions for RIPEMD-160 and SHA2-256 of the form:
+
+(227)
+
+(228)
+
+SHA256(*i* ∈ B) ≡ _o_ ∈ B32
+
+RIPEMD160(*i* ∈ B) ≡ _o_ ∈ B20
+
+The fourth contract, the identity function ΞID simply defines the output as the input:
+
+{empty}(229) ΞID ≡ ΞPRE where:
+
+(230)
+
+_g_ = 15 + 3 +++ll__I__**d**ll+++
+
+32
+____
+
+[arabic, start=231]
+. *o* = _I_*~d~*
+
+____
+The fifth contract performs arbitrary-precision exponentiation under modulo. Here, 0^0^ is taken to be one, and _x_ mod 0 is zero for all _x_. The first word in the input specifies the number of bytes that the first non-negative integer _B_ occupies. The second word in the input specifies the number of bytes that the second non-negative integer _E_ occupies. The third word in the input specifies the number of bytes that the third non-negative integer _M_ occupies. These three words are
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 23
+
+followed by _B_, _E_ and _M_ . The rest of the input is discarded. Whenever the input is too short, the missing bytes are considered to be zero. The output is encoded big-endian into the same format as _M_ ’s.
+____
+
+[arabic, start=232]
+. ΞEXPMOD ≡ ΞPRE except:
+. {blank}
+
+____
+_g_ = max 200__,__ I _f_ max(_.€_~M~_, .€_~B~) max(_.€_ ~E~_,_ 1)
+____
+
+[arabic, start=234]
+. {blank}
+. {blank}
+
+____
+__G__quaddivisor ≡ 3
+
+_f_ (_x_) ≡ _+++x+++_ l2
+
+quaddivisor
+____
+
+[arabic, start=236]
+. {blank}
+
+____
+_.€_~E~ =
+
+0 if __.€__E ≤ 32 ∧ _E_ = 0
+
+llog~2~(_E_)J if __.€__E ≤ 32 ∧ _E_ = 0
+
+8(__.€__E − 32) + llog~2~(_i_[(96 + __.€__B)_.._(127 + __.€__B)])J if 32 __< .€__E ∧ _i_[(96 + __.€__B)_.._(127 + __.€__B)] = 0
+
+8(__.€__E − 32) otherwise
+____
+
+[arabic, start=237]
+. *o* = _B^E^_ mod _M_ ∈ N~8__£__~
+
+[width="100%",cols="19%,14%,6%,61%",options="header",]
+|===
+a|
+____
+(238)
+____
+
+|__.€__B |≡ a|
+____
+_i_[0__..__31]
+____
+
+a|
+____
+(239)
+____
+
+|__.€__E |≡ a|
+____
+_i_[32__..__63]
+____
+
+a|
+____
+(240)
+____
+
+|__.€__M |≡ a|
+____
+_i_[64__..__95]
+____
+
+a|
+____
+(241)
+____
+
+|_B_ |≡ a|
+____
+_i_[96__..__(95 + __.€__B)]
+____
+
+a|
+____
+(242)
+____
+
+|_E_ |≡ a|
+____
+_i_[(96 + __.€__B)_.._(95 + __.€__B + __.€__E)]
+____
+
+a|
+____
+(243)
+____
+
+|_M_ |≡ a|
+____
+_i_[(96 + __.€__B + __.€__E)_.._(95 + __.€__B + __.€__E + __.€__M)]
+____
+
+|===
+
+____
+(244)
+
+_i_[_x_] _I_*~d~*[_x_] if _x <_ ll__I__**~d~**ll
+
+0 otherwise
+____
+
+[arabic]
+. *zkSNARK Related Precompiled Contracts.* We choose two numbers, both of which are prime.
+
+____
+{empty}(245) _p_ ≡ 21888242871839275222246405745257275088696311157297823662689037894645226208583
+
+{empty}(246) _q_ ≡ 21888242871839275222246405745257275088548364400416034343698204186575808495617
+
+Since _p_ is a prime number, \{0__,__ 1__, . . . , p__ − 1} forms a field with addition and multiplication modulo _p_. We call this field __F__p.
+
+We define a set __C__1 with
+
+{empty}(247) __C__1 ≡ \{(_X, Y_ ) ∈ __F__p × __F__p | _Y_ 2 = __X__3 + 3} ∪ \{(0__,__ 0)}
+
+We define a binary operation + on __C__1 for distinct elements (__X__1__, Y__1)_,_ (__X__2__, Y__2) with
+
+(248)
+
+[#_bookmark121 .anchor]##(_X , Y_ ) + (_X , Y_ ) ≡ f(_X, Y_ ) if __X__1 = __X__2
+____
+
+_λ +++Y+++_+++2 − __Y__1+++
+
+__X__2 − __X__1
+
+____
+_X_ ≡ __λ__2 − __X__1 − __X__2
+
+_Y_ ≡ _λ_(__X__1 − _X_) − __Y__1
+
+In the case where (__X__1__, Y__1) = (__X__2__, Y__2), we define + on __C__1 with
+
+{empty}(249) [#_bookmark122 .anchor]##(_X , Y_ ) + (_X , Y_ ) ≡ f(_X, Y_ ) if __Y__1 0
+____
+
+1 1 2 2
+
+_λ_ ≡
+
+____
+(0__,__ 0) otherwise
+
+3__X__^2^
+
+2__Y__1
+
+_X_ ≡ __λ__2 − 2__X__1
+
+_Y_ ≡ _λ_(__X__1 − _X_) − __Y__1
+
+(__C__1__,__ +) is known to form a group. We define scalar multiplication [#_bookmark123 .anchor]##· with
+
+{empty}(250) _n_ · _P_ ≡ (0__,__ 0) + _P_ + · · · + _P_
+
+_n_
+
+for a natural number _n_ and a point _P_ in __C__1.
+
+We define __P__1 to be a point (1__,__ 2) on __C__1. Let __G__1 be the subgroup of (__C__1__,__ +) generated by __P__1. __G__1 is known to be a cyclic group of order _q_. For a point _P_ in __G__1, we define log~__P__1~ (_P_ ) to be the smallest natural number _n_ satisfying _n_ · __P__1 = _P_ . log__P__1 (_P_ ) is at most _q_ − 1.
+
+Let __F~p~__2 be a field _F~p~_[_i_]_/_(_i_^2^ + 1). We define a set _C_~2~ with
+
+{empty}(251) _C_~2~ ≡ \{(_X, Y_ ) ∈ __F~p~__2 × __F~p~__2 | _Y_ ^2^ = _X_^3^ + 3(_i_ + 9)^−1^} ∪ \{(0__,__ 0)}
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 24
+
+We define a binary operation + and scalar multiplication · with the same equations link:#_bookmark121[(248),] link:#_bookmark122[(249)] and link:#_bookmark123[(250).] (__C__2__,__ +) is also known to be a group. We define __P__2 in __C__2 with
+
+(252)
+
+__P__2 ≡ (11559732032986387107991004021392285783925812861821192530917403151452391805634 × _i_
+
++10857046999023057135944570762232829481370756359578518086990519993285655852781__,__
+
+4082367875863433681332203403145435568316851327593401208105741076214120093531 × _i_
+
++8495653923123431417604973247489272438418190587263600148770280649306958101930)
+
+We define __G__2 to be the subgroup of (__C__2__,__ +) generated by __P__2. __G__2 is known to be the only cyclic group of order _q_ on __C__2. For a point _P_ in __G__2, we define log~__P__2~ (_P_ ) be the smallest natural number _n_ satisfying _n_ · __P__2 = _P_ . With this definition, log__P__2 (_P_ ) is at most _q_ − 1.
+
+Let _G~T~_ be the multiplicative abelian group underlying __F~q~__12 . It is known that a non-degenerate bilinear map _e_ : __G__1 × __G__2 → _GT_ exists. This bilinear map is a type three pairing. There are several such bilinear maps, it does not matter which is chosen to be _e_. Let _PT_ = _e_(__P__1__, P__2), _a_ be a set of _k_ points in __G__1, and _b_ be a set of _k_ points in __G__2. It follows from the definition of a pairing that the following are equivalent
+
+(253)
+
+(254)
+
+[#_bookmark124 .anchor]####log__P__1 (_a_~1~) × log__P__2 (_b_~1~) + · · · + log__P__1 (_a~k~_) × log__P__2 (_b~k~_) ≡ 1 mod _q_
+____
+
+_k_
+
+____
+_e_ (_ai, bi_) = _PT_
+
+__i__=0
+
+Thus the pairing operation provides a method to verify link:#_bookmark124[(253).]
+
+A 32 byte number *x* ∈ **P**256 might and might not represent an element of __F__p.
+
+{empty}(255) _δ_ (*x*) ≡ f**x** if *x* _< p_
+
+∅ otherwise
+
+A 64 byte data *x* ∈ **B**512 might and might not represent an element of __G__1.
+
+(256)
+
+_δ_ (*x*) ≡ f__g__1 if __g__1 ∈ __G__1
+
+(257)
+
+∅ otherwise
+____
+
+[loweralpha, start=7]
+. (_x, y_) if _x_ = ∅ ∧ _y_ ∅
+
+____
+∅ otherwise
+
+{empty}(258) _x_ ≡ __δ__p(*x*[0__..__31])
+
+{empty}(259) _y_ ≡ __δ__p(*x*[32__..__63])
+
+A 128 byte data *x* ∈ **B**1024 might and might not represent an element of __G__2.
+
+(260)
+
+_δ_ (*x*) ≡ f__g__2 if __g__2 ∈ __G__2
+
+(261)
+
+∅ otherwise
+
+_g_ ((__x__0__i__ + __y__0)_,_ (__x__1__i__ + __y__1)) if __x__0 = ∅ ∧ __y__0 = ∅ ∧ __x__1
+
+∅ otherwise
+
+∅ ∧ __y__1 = ∅
+____
+
+[width="100%",cols="33%,27%,8%,32%",options="header",]
+|===
+a|
+____
+(262)
+____
+
+|__x__0 a|
+____
+≡
+____
+
+a|
+____
+__δ__p(*x*[0__..__31])
+____
+
+a|
+____
+(263)
+____
+
+|__y__0 a|
+____
+≡
+____
+
+a|
+____
+__δ__p(*x*[32__..__63])
+____
+
+a|
+____
+(264)
+____
+
+|__x__1 a|
+____
+≡
+____
+
+a|
+____
+__δ__p(*x*[64__..__95])
+____
+
+a|
+____
+(265)
+____
+
+|__y__1 a|
+____
+≡
+____
+
+a|
+____
+__δ__p(*x*[96__..__127])
+____
+
+|===
+
+____
+We define ΞSNARKV as a precompiled contract which checks if link:#_bookmark124[(253)] holds, for intended use in zkSNARK verification.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 25
+____
+
+[arabic, start=266]
+. ΞSNARKV ≡ ΞPRE except:
+. ΞSNARKV(_*σ*, g, A, I_) = (∅__,__ 0__, A,__ ()) if _F_
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+
+____
+_F_ ≡ (ll__I__**~d~**ll mod 192 = 0 ∨ (∃__j. a__~j~ = ∅ ∨ _b_~j~ = ∅))
+
+_k_ = +++ll__I__**~d~**ll+++
+
+192
+
+__g__r = 34000__k__ + 45000
+
+*o*[0__..__31] 0__x__0000000000000000000000000000000000000000000000000000000000000001 if _v_ ∧ ¬__F__
+
+0__x__0000000000000000000000000000000000000000000000000000000000000000 if ¬__v__ ∧ ¬__F__
+
+_v_ ≡ (log__P__1 (_a_~1~) × log__P__2 (_b_~1~) + · · · + log__P__1 (_a~k~_) × log__P__2 (_b~k~_) ≡ 1 mod _q_) _a_~1~ ≡ _δ_~1~(_I_*~d~*[0__..__63])
+
+_b_~1~ ≡ _δ_~2~(_I_*~d~*[64__..__191])
+
+.
+
+_a~k~_ ≡ _δ_~1~(_I_*~d~*[(ll__I__**~d~**ll − 192)_.._(ll__I__**~d~**ll − 129)])
+
+_b~k~_ ≡ _δ_~2~(_I_*~d~*[(ll__I__**~d~**ll − 128)_.._(ll__I__**~d~**ll − 1)])
+
+We define a precompiled contract for addition on __G__1.
+____
+
+[arabic, start=277]
+. (277)
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+
+____
+[#_bookmark125 .anchor]####ΞBN ADD ≡ ΞBN PRE except:
+
+ΞBN ADD(_*σ*, g, A, I_) = (∅__,__ 0__, A,__ ()) if _x_ = ∅ ∨ _y_ = ∅
+
+__g__r = 150
+
+*o* ≡ __δ__−1(_x_ + _y_) where + is the group operation in __G__1 _x δ_~1~ __I__¯**d**[0__..__63]
+
+_y_ ≡ _δ_~1~ __I__¯**d**[64__..__127]
+
+*d*
+
+0 otherwise
+
+We define a precompiled contract for scalar multiplication on _G_~1~, where __I__¯**d** is defined in link:#_bookmark125[(283).]
+____
+
+[arabic, start=284]
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+. {blank}
+
+____
+ΞBN MUL ≡ ΞPRE except:
+
+ΞBN MUL(_*σ*, g, A, I_) = (∅__,__ 0__, A,__ ()) if _x_ = ∅
+
+__g__r = 6000
+
+*o* ≡ __δ__−1(_n_ · _x_) where · is the scalar multiplication in __G__1 _x_ ≡ _δ_~1~ __I__¯**d**[0__..__63]
+
+{empty}(289) _n_ ≡ __I__¯**d**[64__..__95]
+____
+
+[arabic]
+. *BLAKE2 Precompiled Contract.* EIP-152 by link:#_bookmark104[Hess et al.] link:#_bookmark104[[2016]] defines ΞBLAKE2 F as a precompiled contract implementing the compression function F used in the BLAKE2 cryptographic hashing algorithm. The F compression function is specified in RFC 7693 by link:#_bookmark92[Saarinen and Aumasson [2015].]
+
+____
+(290)
+
+(291)
+
+(292)
+
+(293)
+
+ΞBLAKE2 F ≡ ΞPRE except:
+
+Ξ~BLAKE2~ ~F~(_*σ*, g, A, I_) = (∅__,__ 0__, A,__ ()) if ll__I__**~d~**ll =
+____
+
+__g__r = _r_
+
+____
+*o* ≡ LE~8~(_h_~0~) · _..._ · LE~8~(_h_~7~)
+
+213 ∨ _f_ ∈__/__ \{0__,__ 1}
+____
+
+[width="100%",cols="20%,25%,5%,50%",options="header",]
+|===
+a|
+____
+(294)
+____
+
+|(_h_~0~_, . . . , h_~7~) a|
+____
+≡
+____
+
+a|
+____
+F(_h, m, t_~low~_, t_~high~_, f_ ) with _r_ rounds and _w_ = 64
+____
+
+a|
+____
+(295)
+____
+
+|BE4(_r_) a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[0__..__4]
+____
+
+a|
+____
+(296)
+____
+
+|LE8(__h__0) a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[4__..__12]
+____
+
+a|
+____
+(297)
+____
+
+| a|
+____
+_. . ._
+____
+
+|
+a|
+____
+(298)
+____
+
+|LE8(__h__7) a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[60__..__68]
+____
+
+a|
+____
+(299)
+____
+
+|LE8(__m__0) a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[68__..__76]
+____
+
+a|
+____
+(300)
+____
+
+| a|
+____
+_. . ._
+____
+
+|
+a|
+____
+(301)
+____
+
+|LE8(__m__15) a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[188__..__196]
+____
+
+a|
+____
+(302)
+____
+
+|LE~8~(_t_~low~) a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[196__..__204]
+____
+
+a|
+____
+(303)
+____
+
+|LE8(__t__high) a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[204__..__212]
+____
+
+a|
+____
+(304)
+____
+
+|_f_ a|
+____
+≡
+____
+
+a|
+____
+_I_*~d~*[212]
+____
+
+|===
+
+____
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 26
+
+where _r_ ∈ B~32~, ∀__i__ ∈ 0__..__7 : _h~i~_ ∈ B~64~, ∀__i__ ∈ 0__..__15 : _m~i~_ ∈ B~64~, _t_~low~ ∈ B~64~, _t_~high~ ∈ B~64~, _f_ ∈ B~8~, BE__~k~__ is the _k_-byte big-endian representation—compare link:#_bookmark115[with(193):]
+
+__k__−1
+
+{empty}(305) BE__~k~__(_x_) ≡ (_b_~0~_, b_~1~_, ..., b~k~_~−1~) : _x_ = _b~n~_ · 256 ^−^ ^−^
+
+__n__=0
+
+and LE__~k~__ is the _k_-byte little-endian representation:
+
+__k__−1
+
+{empty}(306) LE__~k~__(_x_) ≡ (_b_~0~_, b_~1~_, ..., b~k~_~−1~) : _x_ = _b~n~_ · 256__^n^__
+
+__n__=0
+
+[#Appendix_F._Signing_Transactions .anchor]####Appendix F. Signing Transactions
+
+Transactions are signed using recoverable ECDSA signatures. This method utilises the SECP-256k1 curve as described by link:#_bookmark84[Courtois et al. [2014],] and is implemented similarly to as described by link:#_bookmark99[Gura et al.] [link:#_bookmark99[2004]] on p. 9 of 15, para. 3.
+
+It is assumed that the sender has a valid private key __p__r, which is a randomly selected positive integer (represented as a byte array of length 32 in big-endian form) in the range [1__,__ secp256k1n − 1].
+
+We assume the existence of functions ECDSAPUBKEY, ECDSASIGN and ECDSARECOVER. These are formally defined in the
+
+literature, e.g. by link:#_bookmark108[Johnson et al. [2001].]
+
+(307)
+
+(308)
+
+(309)
+
+ECDSAPUBKEY(__p__r ∈ B32) ≡ __p__u ∈ B64
+
+ECDSASIGN(_e_ ∈ B32__, p__r ∈ B32) ≡ (_v_ ∈ B1__, r__ ∈ B32__, s__ ∈ B32)
+
+ECDSARECOVER(_e_ ∈ B32__, v__ ∈ B1__, r__ ∈ B32__, s__ ∈ B32) ≡ __p__u ∈ B64
+
+Where __p__u is the public key, assumed to be a byte array of size 64 (formed from the concatenation of two positive integers each _<_ 2^256^), __p__r is the private key, a byte array of size 32 (or a single positive integer in the aforementioned range) and _e_ is the hash of the transaction, link:#_bookmark130[_h_(_T_] ). It is assumed that [#_bookmark127 .anchor]##_v_ is the ‘recovery identifier’. The recovery identifier
+
+is a 1 byte value specifying the parity and finiteness of the coordinates of the curve point for which _r_ is the x-value; this value is in the range of [0__,__ 3], however we declare the upper two possibilities, representing infinite values, invalid. The value 0 represents an even _y_ value and 1 represents an odd _y_ value.
+
+We declare that an ECDSA signature is invalid unless all the following conditions are true:
+
+(310)
+
+(311)
+
+(312)
+
+where: (313)
+
+0 _<_[#_bookmark128 .anchor]## [#_bookmark129 .anchor]##_r <_ secp256k1n
+
+0 _< s <_ secp256k1n ÷ 2 + 1
+
+link:#_bookmark127[_v_] ∈ \{0__,__ 1}
+
+secp256k1n = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+
+For a given private key, __p__r, the Ethereum address _A_(__p__r) (a 160-bit value) to which it corresponds is defined as the rightmost 160-bits of the Keccak-256 hash of the corresponding ECDSA public key:
+
+{empty}(314) _A_(__p__r) = [#_bookmark130 .anchor]####B96__..__255 KEC ECDSAPUBKEY(__p__r)
+
+The message hash, _h_(_T_ ), to be signed is the Keccak-256 hash of the transaction. Three different flavours of signing schemes are available:
+
+(315)
+
+__L__X(_T_ ) ≡
+
+where
+
+(__T__n__, T__p__, T__g__, T__t__, T__v__,__ *p*) if __T__x = 0 ∧ __T__w ∈ \{27__,__ 28}
+
+(__T__n__, T__p__, T__g__, T__t__, T__v__,__ *p*_, β,_ ()_,_ ()) if __T__x = 0 ∧ __T__w ∈ \{2__β__ + 35__,__ 2__β__ + 36}
+
+(_T_~c~_, T_~n~_, T_~p~_, T_~g~_, T_~t~_, T_~v~_,_ *p*_, T_*~A~*) if _T_~x~ = 1
+
+(316)
+
+*p* _T_*~i~* if _T_~t~ = ∅
+
+_T_*~d~* otherwise
+____
+
+_h_(_T_ ) KEC(RLP(__L__X(_T_ ))) if __T__x = 0
+
+KEC(__T__x · RLP(__L__X(_T_ ))) otherwise
+
+____
+The signed transaction _G_(__T, p__r) is defined as: (317)
+
+_G_(__T, p__r) ≡ _T_ except:
+
+(318)
+
+link:#_bookmark8[Reiterating from previously:] (319)
+
+(320)
+
+(__T__y__, T__r__, T__s) = ECDSASIGN(_h_(_T_ )__, p__r)
+
+__T__r = __link:#_bookmark128[r] T__s = link:#_bookmark129[_s_]
+
+and link:#_bookmark11[__T__w] of legacy transcations is either 27 + __T__y or 2link:#_bookmark1[_β_] + 35 + __T__y.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 27
+____
+
+[width="100%",cols="17%,83%",options="header",]
+|===
+a|
+____
+We may then define the sender function _S_ of the transaction as:
+____
+
+|
+a|
+____
+(321)
+____
+
+a|
+____
+_S_(_T_ ) ≡ B96__..__255 KEC ECDSARECOVER(_h_(_T_ )__, v, T__r__, T__s)
+____
+
+a|
+____
+(322)
+____
+
+a|
+____
+__T__w − 27 if __T__x = 0 ∧ __T__w ∈ \{27__,__ 28}
+
+_v_ ≡ (__T__w − 35) mod 2 if __T__x = 0 ∧ __T__w ∈ \{2__β__ + 35__,__ 2__β__ + 36}
+
+__T__y if __T__x = 1
+____
+
+a|
+____
+The assertion that the sender of a signed transaction equals the address of the signer should be self-evident:
+
+{empty}(323) ∀__T__ : ∀__p__r : _S_(_G_(__T, p__r)) ≡ _A_(__p__r)
+
+[#Appendix_G._Fee_Schedule .anchor]####Appendix G. Fee Schedule
+
+The fee schedule _G_ is a tuple of scalar values corresponding to the relative costs, in gas, of a number of abstract operations that a transaction may effect.
+____
+
+|
+|===
+
+[width="100%",cols="16%,6%,78%",options="header",]
+|===
+a|
+____
+Name
+____
+
+|Value a|
+____
+Description
+____
+
+a|
+____
+__G__zero
+____
+
+|0 a|
+____
+Nothing paid for operations of the set __W__zero.
+____
+
+a|
+____
+__G__jumpdest
+____
+
+|1 a|
+____
+Amount of gas to pay for a JUMPDEST operation.
+____
+
+a|
+____
+__G__base
+____
+
+|2 a|
+____
+Amount of gas to pay for operations of the set _W_~base~.
+____
+
+a|
+____
+__G__verylow
+____
+
+|3 a|
+____
+Amount of gas to pay for operations of the set _W_~verylow~.
+____
+
+a|
+____
+__G__low
+____
+
+|5 a|
+____
+Amount of gas to pay for operations of the set _W_~low~.
+____
+
+a|
+____
+__G__mid
+____
+
+|8 a|
+____
+Amount of gas to pay for operations of the set _W_~mid~.
+____
+
+a|
+____
+__G__high
+____
+
+|10 a|
+____
+Amount of gas to pay for operations of the set _W_~high~.
+____
+
+a|
+____
+__G__warmaccess
+____
+
+|100 a|
+____
+Cost of a warm account or storage access.
+____
+
+a|
+____
+[#_bookmark132 .anchor]##__G__accesslistaddress
+____
+
+|2400 a|
+____
+Cost of warming up an account with the access list.
+____
+
+a|
+____
+[#_bookmark133 .anchor]##__G__accessliststorage
+____
+
+|1900 a|
+____
+Cost of warming up a storage with the access list.
+____
+
+a|
+____
+__G__coldaccountaccess
+____
+
+|2600 a|
+____
+Cost of a cold account access.
+____
+
+a|
+____
+__G__coldsload
+____
+
+|2100 a|
+____
+Cost of a cold storage access.
+____
+
+a|
+____
+__G__sset
+____
+
+|20000 a|
+____
+Paid for an SSTORE operation when the storage value is set to non-zero from zero.
+____
+
+a|
+____
+__G__sreset
+____
+
+|2900 a|
+____
+Paid for an SSTORE operation when the storage value’s zeroness remains unchanged or is set to zero.
+____
+
+a|
+____
+__R__sclear
+____
+
+|15000 a|
+____
+Refund given (added into refund counter) when the storage value is set to zero from
+
+non-zero.
+____
+
+a|
+____
+__R__selfdestruct
+____
+
+|24000 a|
+____
+Refund given (added into refund counter) for self-destructing an account.
+____
+
+a|
+____
+__G__selfdestruct
+____
+
+|5000 a|
+____
+Amount of gas to pay for a SELFDESTRUCT operation.
+____
+
+a|
+____
+__G__create
+____
+
+|32000 a|
+____
+Paid for a CREATE operation.
+____
+
+a|
+____
+__G__codedeposit
+____
+
+|200 a|
+____
+Paid per byte for a CREATE operation to succeed in placing code into state.
+____
+
+a|
+____
+__G__callvalue
+____
+
+|9000 a|
+____
+Paid for a non-zero value transfer as part of the CALL operation.
+____
+
+a|
+____
+[#_bookmark134 .anchor]##__G__callstipend
+____
+
+|2300 a|
+____
+A stipend for the called contract subtracted from _G_~callvalue~ for a non-zero value transfer.
+____
+
+a|
+____
+__G__newaccount
+____
+
+|25000 a|
+____
+Paid for a CALL or SELFDESTRUCT operation which creates an account.
+____
+
+a|
+____
+__G__exp
+____
+
+|10 a|
+____
+Partial payment for an EXP operation.
+____
+
+a|
+____
+__G__expbyte
+____
+
+|50 a|
+____
+Partial payment when multiplied by the number of bytes in the exponent for the EXP operation.
+____
+
+a|
+____
+__G__memory
+____
+
+|3 a|
+____
+Paid for every additional word when expanding memory.
+____
+
+a|
+____
+[#_bookmark135 .anchor]##__G__txcreate
+____
+
+|32000 a|
+____
+Paid by all contract-creating transactions after the _Homestead_ transition.
+____
+
+a|
+____
+[#_bookmark136 .anchor]##__G__txdatazero
+____
+
+|4 a|
+____
+Paid for every zero byte of data or code for a transaction.
+____
+
+a|
+____
+[#_bookmark137 .anchor]##__G__txdatanonzero
+____
+
+|16 a|
+____
+Paid for every non-zero byte of data or code for a transaction.
+____
+
+a|
+____
+[#_bookmark138 .anchor]##__G__transaction
+____
+
+|21000 a|
+____
+Paid for every transaction.
+____
+
+a|
+____
+__G__log
+____
+
+|375 a|
+____
+Partial payment for a LOG operation.
+____
+
+a|
+____
+__G__logdata
+____
+
+|8 a|
+____
+Paid for each byte in a LOG operation’s data.
+____
+
+a|
+____
+__G__logtopic
+____
+
+|375 a|
+____
+Paid for each topic of a LOG operation.
+____
+
+a|
+____
+__G__keccak256
+____
+
+|30 a|
+____
+Paid for each KECCAK256 operation.
+____
+
+a|
+____
+__G__keccak256word
+____
+
+|6 a|
+____
+Paid for each word (rounded up) for input data to a KECCAK256 operation.
+____
+
+a|
+____
+__G__copy
+____
+
+|3 a|
+____
+Partial payment for *COPY operations, multiplied by words copied, rounded up.
+____
+
+a|
+____
+__G__blockhash
+____
+
+|20 a|
+____
+Payment for each BLOCKHASH operation.
+____
+
+|===
+
+____
+[#Appendix_H._Virtual_Machine_Specificatio .anchor]####Appendix H. Virtual Machine Specification
+
+When interpreting 256-bit binary values as integers, the representation is big-endian.
+
+When a 256-bit machine datum is converted to and from a 160-bit address or hash, the rightwards (low-order for BE) 20 bytes are used and the leftmost 12 are discarded or filled with zeroes, thus the integer values (when the bytes are interpreted as big-endian) are equivalent.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 28
+____
+
+[arabic]
+. *Gas Cost.* The general gas cost function, _C_, is defined as:
+
+____
+(324)
+
+_C_(_*σ*, *µ*, A, I_) ≡ __C__mem(**_µ_**i) − __C__mem(*_µ_*~i~) +
+
+__C__SSTORE(_*σ*, *µ*, A, I_) if _w_ = SSTORE
+
+__G__exp if _w_ = EXP ∧ *_µ_~s~*[1] = 0
+
+_G_~exp~ + _G_~expbyte~ × (1 + llog256(*__µ__s*[1])J) if _w_ = EXP ∧ *__µ__s*[1] _>_ 0 _G_~verylow~ + _G_~copy~ × r**__µ__s**[2] ÷ 321 if _w_ ∈ _W_~copy~ __C__aaccess(*_µ_~s~*[0] mod 2^160^_, A_) + __G__copy × r**_µ_~s~**[3] ÷ 321 if _w_ = EXTCODECOPY __C__aaccess(*__µ__s*[0] mod 2160__, A__) if _w_ ∈ __W__extaccount
+
+_G_~log~ + _G_~logdata~ × *__µ__s*[1] if _w_ = LOG0
+
+__G__log + __G__logdata × *__µ__s*[1] + __G__logtopic if _w_ = LOG1
+
+__G__log + __G__logdata × *__µ__s*[1] + 2__G__logtopic if _w_ = LOG2
+
+__G__log + __G__logdata × *__µ__s*[1] + 3__G__logtopic if _w_ = LOG3
+
+__G__log + __G__logdata × *__µ__s*[1] + 4__G__logtopic if _w_ = LOG4
+
+_C_~CALL~(_*σ*, *µ*, A_) if _w_ ∈ _W_~call~
+
+__C__SELFDESTRUCT(_*σ*, *µ*_) if _w_ = SELFDESTRUCT
+
+__G__create if _w_ = CREATE
+
+__G__create + __G__keccak256word × r**__µ__s**[2] ÷ 321 if _w_ = link:#_bookmark150[CREATE2] __G__keccak256 + __G__keccak256word × r**__µ__s**[1] ÷ 321 if _w_ = KECCAK256 __G__jumpdest if _w_ = JUMPDEST
+
+__C__SLOAD(_*µ*, A, I_) if _w_ = SLOAD
+
+__G__zero if _w_ ∈ __W__zero
+
+__G__base if _w_ ∈ __W__base
+
+__G__verylow if _w_ ∈ __W__verylow
+
+__G__low if _w_ ∈ __W__low
+
+__G__mid if _w_ ∈ __W__mid
+
+__G__high if _w_ ∈ __W__high
+____
+
+__G__blockhash if _w_ = link:#_bookmark144[BLOCKHASH]
+
+[arabic, start=325]
+. _w I_*~b~*[**_µ_**pc] if **_µ_**pc _<_ ll__I__**~b~**ll
+
+STOP otherwise
+
+____
+where:
+____
+
+[arabic, start=326]
+. __C__mem(_a_) ≡ __G__memory · _a_ +
+
+____
+__a__2
+
+512
+____
+
+[arabic, start=327]
+. [#_bookmark140 .anchor]##_C_
+
+aaccess
+
+(_x, A_) __G__warmaccess if _x_ ∈ link:#_bookmark39[_A_*a*] __G__coldaccountaccess otherwise
+
+____
+with __C__CALL, __C__SELFDESTRUCT, __C__SLOAD and __C__SSTORE as specified in the appropriate section below. We define the following subsets of instructions:
+
+__W__zero = \{STOP, RETURN, REVERT}
+
+_W_~base~ = \{ADDRESS, ORIGIN, CALLER, CALLVALUE, CALLDATASIZE, CODESIZE, GASPRICE, COINBASE, TIMESTAMP, NUMBER, DIFFICULTY, GASLIMIT, CHAINID, RETURNDATASIZE, POP, PC, MSIZE, GAS}
+
+_W_~verylow~ = \{ADD, SUB, NOT, LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, BYTE, SHL, SHR, SAR, CALLDATALOAD, MLOAD, MSTORE, MSTORE8, PUSH*, DUP*, SWAP*}
+
+_W_~low~ = \{MUL, DIV, SDIV, MOD, SMOD, SIGNEXTEND, SELFBALANCE}
+
+_W_~mid~ = \{ADDMOD, MULMOD, JUMP}
+
+_W_~high~ = \{JUMPI}
+
+__W__copy = \{CALLDATACOPY, CODECOPY, RETURNDATACOPY} _W_~call~ = \{CALL, CALLCODE, DELEGATECALL, STATICCALL} __W__extaccount = \{BALANCE, EXTCODESIZE, EXTCODEHASH}
+
+Note the memory cost component, given as the product of __G__memory and the maximum of 0 & the ceiling of the number of words in size that the memory must be over the current number of words, **_µ_**i in order that all accesses reference valid memory whether for read or write. Such accesses must be for non-zero number of bytes.
+
+Referencing a zero length range (e.g. by attempting to pass it as the input range to a CALL) does not require memory to be extended to the beginning of the range. **_µ_**i is defined as this new maximum number of words of active memory; special-cases are given where these two are not equal.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 29
+
+Note also that __C__mem is the memory cost function (the expansion function being the difference between the cost before and after). It is a polynomial, with the higher-order coefficient divided and floored, and thus linear up to 724B of memory used, after which it costs substantially more.
+
+While defining the instruction set, we defined the memory-expansion for range function, _M_ , thus:
+____
+
+[arabic, start=328]
+. _M_ (_s, f, l_) _s_ if _l_ = 0 max(_s,_ r(_f_ + _l_) ÷ 321) otherwise
+
+____
+Another useful function is “all but one 64th” function _L_ defined as:
+
+{empty}(329) [#_bookmark141 .anchor]##_L_(_n_) ≡ _n_ − l__n/__64J
+____
+
+[arabic]
+. [#H.2._Instruction_Set .anchor]##*Instruction Set.* As previously specified in section link:#9._Execution_Model[9,] these definitions take place in the final context there. In particular we assume _O_ is the EVM state-progression function and define the terms pertaining to the next cycle’s state (_*σ* , *µ *_) such that:
+
+____
+{empty}(330) _O_(_*σ*, *µ*, A, I_) ≡ (_*σ* , *µ* , A , I_) with exceptions, as noted
+
+Here given are the various exceptions to the state transition rules given in section link:#9._Execution_Model[9] specified for each instruction, together with the additional instruction-specific definitions of _J_ and _C_. For each instruction, also specified is _α_, the additional items placed on the stack and _δ_, the items removed from stack, as defined in section link:#9._Execution_Model[9.]
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 30
+____
+
+== 0s: Stop and Arithmetic Operations
+
+____
+All arithmetic is modulo 2^256^ unless otherwise noted. The zero-th power of zero 0^0^ is defined to be one.
+____
+
+== Value Mnemonic _δ α_ Description
+
+____
+[#_bookmark143 .anchor]####0x00 STOP 0 0 Halts execution.
+
+0x01 ADD 2 1 Addition operation.
+
+*__µ__s*[0] ≡ *__µ__s*[0] + *__µ__s*[1]
+
+0x02 MUL 2 1 Multiplication operation.
+
+*__µ__s*[0] ≡ *__µ__s*[0] × *__µ__s*[1]
+
+0x03 SUB 2 1 Subtraction operation.
+
+*__µ__s*[0] ≡ *__µ__s*[0] − *__µ__s*[1]
+
+0x04 DIV 2 1 Integer division operation.
+____
+
+0 if *__µ__s*[1] = 0
+
+____
+*s*
+
+l**__µ__s**[0] ÷ *__µ__s*[1]J otherwise
+
+0x05 SDIV 2 1 Signed integer division operation (truncated).
+
+**sgn**(*__µ__s*[0] ÷ *__µ__s*[1])l|**__µ__s**[0] ÷ *__µ__s*[1]|J otherwise
+
+Where all values are treated as two’s complement signed 256-bit integers. Note the overflow semantic when −2^255^ is negated.
+
+0x06 MOD 2 1 Modulo remainder operation.
+
+*_µ_* [0] ≡ 0 if *__µ__s*[1] = 0
+
+0x07 SMOD 2 1 Signed modulo remainder operation.
+
+*_µ_* [0] ≡ 0 if *__µ__s*[1] = 0
+
+*sgn*(*_µ_* [0])(|**_µ_** [0]| mod |**_µ_** [1]|) otherwise
+
+Where all values are treated as two’s complement signed 256-bit integers.
+
+0x08 ADDMOD 3 1 Modulo addition operation.
+
+*_µ_* [0] ≡ 0 if *__µ__s*[2] = 0
+
+All intermediate calculations of this operation are not subject to the 2^256^ modulo.
+
+0x09 MULMOD 3 1 Modulo multiplication operation.
+
+*_µ_* [0] ≡ 0 if *__µ__s*[2] = 0
+
+(*_µ_* [0] × *_µ_* [1]) mod *_µ_* [2] otherwise
+
+All intermediate calculations of this operation are not subject to the 2^256^ modulo.
+
+0x0a EXP 2 1 Exponential operation.
+
+*_µ_* [0] ≡ *_µ_* [0]*__^µ^__s*[1]
+
+0x0b SIGNEXTEND 2 1 Extend length of two’s complement signed integer.
+____
+
+∀__i__ ∈ [0__..__255] : *_µ_* [0]
+
+____
+≡ f**_µ_~s~**[1]t if _i_ _t_ where _t_ = 256 − 8(*_µ_~s~*[0] + 1)
+
+*_µ_~s~*[_x_]i gives the __i__th bit (counting from zero) of *_µ_~s~*[_x_]
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 31
+____
+
+== 10s: Comparison & Bitwise Logic Operations
+
+____
+*_µ_* [0] ≡ f1 if *__µ__s*[0] _< *µ*_*s*[1]
+
+0x11 GT 2 1 Greater-than comparison.
+
+*_µ_* [0] ≡ 1 if *__µ__s*[0] _> *µ*_*s*[1]
+
+0x12 SLT 2 1 Signed less-than comparison.
+
+*_µ_* [0] ≡ 1 if *__µ__s*[0] _< *µ*_*s*[1]
+
+Where all values are treated as two’s complement signed 256-bit integers.
+
+0x13 SGT 2 1 Signed greater-than comparison.
+
+*_µ_* [0] ≡ 1 if *__µ__s*[0] _> *µ*_*s*[1]
+
+Where all values are treated as two’s complement signed 256-bit integers.
+
+0x14 EQ 2 1 Equality comparison.
+
+*_µ_* [0] ≡ 1 if *__µ__s*[0] = *__µ__s*[1]
+
+0x15 ISZERO 1 1 Simple not operator.
+
+*_µ_* [0] ≡ 1 if *__µ__s*[0] = 0
+
+0x16 AND 2 1 Bitwise AND operation.
+
+∀__i__ ∈ [0__..__255] : *_µ_~s~*[0]i ≡ *_µ_~s~*[0]i ∧ *_µ_~s~*[1]i
+
+0x17 OR 2 1 Bitwise OR operation.
+
+∀__i__ ∈ [0__..__255] : *_µ_~s~*[0]i ≡ *_µ_~s~*[0]i ∨ *_µ_~s~*[1]i
+
+0x18 XOR 2 1 Bitwise XOR operation.
+
+∀__i__ ∈ [0__..__255] : *_µ_~s~*[0]i ≡ *_µ_~s~*[0]i ⊕ *_µ_~s~*[1]i
+
+0x19 NOT 1 1 Bitwise NOT operation.
+
+∀__i__ ∈ [0__..__255] : *_µ_~s~*[0]i
+
+1 if *_µ_~s~*[0]i = 0
+
+0 otherwise
+
+0x1a BYTE 2 1 Retrieve single byte from word.
+
+∀__i__ ∈ [0__..__255] : *_µ_~s~*[0]i
+
+*__µ__s*[1]~(__i__−248+8**_µ_**~*s*[0]) if _i_ ≥ 248 ∧ *__µ__s*[0] _<_ 32
+
+0 otherwise
+
+For the Nth byte, we count from the left (i.e. N=0 would be the most significant in big endian).
+____
+
+[width="100%",cols="9%,9%,6%,76%",options="header",]
+|===
+|0x1b a|
+____
+SHL
+____
+
+|2 a|
+____
+1 Left shift operation.
+
+*_µ_* [0] ≡ (*_µ_* [1] × 2**__^µ^__s**[0]) mod 2^256^
+
+*s s*
+____
+
+|0x1c a|
+____
+SHR
+____
+
+|2 a|
+____
+1 Logical right shift operation.
+
+*_µ_* [0] ≡ l**_µ_** [1] ÷ 2**__^µ^__s**[0]J
+
+*s s*
+____
+
+|0x1d a|
+____
+SAR
+____
+
+|2 a|
+____
+1 Arithmetic (signed) right shift operation.
+____
+
+|===
+
+____
+*_µ_* [0] ≡ l**_µ_** [1] ÷ 2**__^µ^__s**[0]J
+
+Where *__µ__s*[0] and *__µ__s*[1] are treated as two’s complement signed 256-bit integers, while *__µ__s*[0] is treated as unsigned.
+____
+
+== 20s: KECCAK256
+
+[width="100%",cols="12%,23%,5%,60%",options="header",]
+|===
+|*Value* a|
+____
+*Mnemonic* _δ_
+____
+
+|_α_ a|
+____
+*Description*
+____
+
+|0x20 a|
+____
+KECCAK256 2
+____
+
+a|
+____
+1
+____
+
+a|
+____
+Compute Keccak-256 hash.
+
+*__µ__s*[0] ≡ KEC(*__µ__m*[*__µ__s*[0] _. . ._ (*__µ__s*[0] + *__µ__s*[1] − 1)])
+
+**_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[0]_, *µ*_*s*[1])
+____
+
+|===
+
+____
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 32
+
+∀__i__ ∈ \{0 _. . . *µ *_[2] − 1} : *_µ_*
+
+[*_µ_* [0] + _i_] ≡ f__I__*~d~*[*__µ__s*[1] + _i_] if *__µ__s*[1] + _i <_ ll__I__**~d~**ll
+
+The additions in *_µ_* [1] + _i_ are not subject to the 2^256^ modulo.
+
+**_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[0]_, *µ*_*s*[2])
+
+This pertains to the input data passed with the message call instruction
+
+or transaction.
+
+0x38 CODESIZE 0 1 Get size of code running in current environment.
+
+*__µ__s*[0] ≡ ll__I__**~b~**ll
+
+0x39 CODECOPY 3 0 Copy code running in current environment to memory.
+
+∀__i__ ∈ \{0 _. . . *µ *_[2] − 1} : *_µ_*
+
+[*_µ_* [0] + _i_] ≡ f__I__*~b~*[*__µ__s*[1] + _i_] if *__µ__s*[1] + _i <_ ll__I__**~b~**ll
+____
+
+*s m s*
+
+____
+**_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[0]_, *µ*_*s*[2])
+
+STOP otherwise
+
+The additions in *_µ_* [1] + _i_ are not subject to the 2^256^ modulo.
+____
+
+*__µ__s*[0] ≡
+
+____
+160
+
+*s*
+
+0 otherwise
+
+where KEC(*b*) ≡ *_σ_*[*_µ_* [0] mod 2^160^]c
+
+_A_*~a~* ≡ _A_*~a~* ∪ \{*_µ_* [0] mod 2^160^}
+
+0x3c EXTCODECOPY 4 0 Copy an account’s code to memory.
+
+∀__i__ ∈ \{0 _. . . *µ *_[3] − 1} : *_µ_*
+
+[*_µ_* [1] + _i_] ≡ f**b**[*__µ__s*[2] + _i_] if *__µ__s*[2] + _i <_ ll**b**ll
+
+where KEC(*b*) ≡ *_σ_*[*_µ_* [0] mod 2^160^]c
+
+We assume *b* ≡ () if *_σ_*[*_µ_* [0] mod 2^160^] = ∅.
+
+**_µ_**i _M_ (**_µ_**i__, *µ*__*s*[1]_, *µ*_*s*[3])
+
+The additions in *_µ_* [2] + _i_ are not subject to the 2^256^ modulo.
+
+_A_*~a~* ≡ _A_*~a~* ∪ \{*_µ_* [0] mod 2^160^}
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 33
+
+0x3d RETURNDATASIZE 0 1 Get size of output data from the previous call from the current
+
+environment.
+
+*__µ__s*[0] ≡ ll**__µ__o**ll
+
+0x3e RETURNDATACOPY 3 0 Copy output data from the previous call to memory.
+
+∀__i__ ∈ \{0 _. . . *µ *_[2] − 1} : *_µ_*
+
+[*_µ_* [0] + _i_] ≡ f**__µ__o**[*__µ__s*[1] + _i_] if *__µ__s*[1] + _i <_ ll**__µ__o**ll
+
+The additions in *_µ_* [1] + _i_ are not subject to the 2^256^ modulo.
+
+**_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[0]_, *µ*_*s*[2])
+
+0x3f EXTCODEHASH 1 1 Get hash of an account’s code.
+
+0 if DEAD(_*σ*, *µ *_[0] mod 2^160^)
+
+_A_*~a~* ≡ _A_*~a~* ∪ \{*_µ_* [0] mod 2^160^}
+____
+
+== 40s: Block Information
+
+____
+[#_bookmark144 .anchor]####where _P_ is the hash of a block of a particular number, up to a maximum age. 0 is left on the stack if the looked for block number is greater than or
+
+equal to the current block number or more than 256 blocks behind the current block.
+____
+
+_P_ (_h, n, a_) ≡
+
+[loweralpha, start=8]
+. if _n_ = __H__i
+
+____
+__P__ (__H__p__, n, a__ + 1) otherwise
+
+and we assert the header _H_ can be determined from its hash _h_ unless _h_ is zero (as is the case for the parent hash of the genesis block).
+
+0x41 COINBASE 0 1 Get the current block’s beneficiary address.
+
+*_µ_~s~*[0] ≡ __I__Hc
+
+0x42 TIMESTAMP 0 1 Get the current block’s timestamp.
+
+*_µ_~s~*[0] ≡ __I__Hs
+
+0x43 NUMBER 0 1 Get the current block’s number.
+
+*_µ_~s~*[0] ≡ __I__Hi
+
+0x44 DIFFICULTY 0 1 Get the current block’s difficulty.
+
+*_µ_~s~*[0] ≡ __I__Hd
+
+0x45 GASLIMIT 0 1 Get the current block’s gas limit.
+
+*_µ_~s~*[0] ≡ __I__Hl
+
+0x46 CHAINID 0 1 Get the link:#_bookmark1[chain ID.]
+
+*__µ__s*[0] ≡ _β_
+
+0x47 SELFBALANCE 0 1 Get balance of currently executing account.
+
+*_µ_* *s*[0] ≡ *_σ_*[_I_~a~]~b~
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 34
+____
+
+== 50s: Stack, Memory, Storage and Flow Operations
+
+[width="100%",cols="10%,13%,3%,3%,71%",options="header",]
+|===
+a|
+____
+*Value*
+
+0x50
+____
+
+a|
+____
+*Mnemonic*
+
+POP
+____
+
+a|
+_δ_
+
+____
+1
+____
+
+a|
+____
+_α_
+
+0
+____
+
+a|
+____
+*Description*
+
+Remove item from stack.
+____
+
+|0x51 a|
+____
+MLOAD
+____
+
+a|
+____
+1
+____
+
+|1 a|
+____
+Load word from memory.
+
+*__µ__s*[0] ≡ *__µ__m*[*__µ__s*[0] _. . ._ (*__µ__s*[0] + 31)]
+
+**_µ_**i ≡ max(**_µ_**i__,__ r(*__µ__s*[0] + 32) ÷ 321)
+
+The addition in the calculation of *_µ_* is not subject to the 2^256^ modulo.
+____
+
+i
+
+|0x52 a|
+____
+MSTORE
+____
+
+a|
+____
+2
+____
+
+|0 a|
+____
+Save word to memory.
+
+*__µ__m*[*__µ__s*[0] _. . ._ (*__µ__s*[0] + 31)] ≡ *__µ__s*[1] **_µ_**i ≡ max(**_µ_**i__,__ r(*__µ__s*[0] + 32) ÷ 321)
+
+The addition in the calculation of *_µ_* is not subject to the 2^256^ modulo.
+____
+
+i
+
+|0x53 a|
+____
+MSTORE8
+____
+
+a|
+____
+2
+____
+
+|0 a|
+____
+Save byte to memory.
+
+*__µ__m*[*__µ__s*[0]] ≡ (*__µ__s*[1] mod 256)
+
+**_µ_**i ≡ max(**_µ_**i__,__ r(*__µ__s*[0] + 1) ÷ 321)
+
+The addition in the calculation of *_µ_* is not subject to the 2^256^ modulo.
+____
+
+i
+
+|0x54 a|
+____
+SLOAD
+____
+
+a|
+____
+1
+____
+
+|1 a|
+____
+Load word from storage.
+____
+
+|===
+
+____
+*_µ_~s~*[0] ≡ *_σ_*[__I__a]*s*[*_µ_~s~*[0]]
+
+_A_ *K* ≡ _A_*~K~* ∪ \{(_I_~a~__, *µ*__f**s**[0])}
+
+[#_bookmark145 .anchor]####0x55 SSTORE 2 0 Save word to storage.
+
+*_σ_* [__I__a]*s*[*_µ_~s~*[0]] ≡ *_µ_~s~*[1]
+
+_A_*K* ≡ _A_*~K~* ∪ \{(_I_~a~_, *µ*_*s*[0])}
+
+[#_bookmark146 .anchor]##_C_~SSTORE~(_*σ*, *µ*_) and _A_~r~ are specified by EIP-2200 as follows.
+
+We remind the reader that the checkpoint (“original”) state link:#_bookmark41[**_σ_**0] is the state if the current transaction were to revert.
+
+Let __v__0 = **_σ_**0[__I__a]*s*[*_µ_~s~*[0]] be the original value of the storage slot. Let _v_ = *_σ_*[__I__a]*s*[*_µ_~s~*[0]] be the current value.
+
+Let _v_ = *__µ__s*[1] be the new value.
+
+Then:
+____
+
+__C__SSTORE
+
+(_*σ*, *µ*, A, I_) 0 if (_I_~a~_, *µ*_*s*[0]) ∈ _A_*~K~* _G_~coldsload~ otherwise
+
+____
+__G__warmaccess if _v_ = _v_ ∨ __v__0 = _v_
+
++ __G__sset if _v_ = _v_ ∧ __v__0 = _v_ ∧ __v__0 = 0
+
+ __G__sreset if _v_ = _v_ ∧ __v__0 = _v_ ∧ __v__0 = 0
+
+__R__~sclear~ if _v_ = _v_ ∧ _v_~0~ = _v_ ∧ _v_ = 0
+____
+
+where
+
+____
+0 otherwise
+
+−__R__~sclear~ if _v_~0~ = 0 ∧ _v_ = 0
+
+__r__dirtyclear ≡
+
+__r__dirtyreset ≡
+
+_R_~sclear~ if _v_~0~ = 0 ∧ _v_ = 0
+
+0 otherwise
+
+__G__sset − __G__warmaccess if __v__0 = _v_ ∧ __v__0 = 0
+
+__G__sreset − __G__warmaccess if __v__0 = _v_ ∧ __v__0 = 0
+
+[#_bookmark147 .anchor]####0 otherwise
+____
+
+[width="100%",cols="11%,10%,5%,3%,71%",options="header",]
+|===
+|0x56 a|
+____
+JUMP
+____
+
+|1 a|
+____
+0 Alter the program counter.
+____
+
+|
+| | | | a|
+____
+__J__JUMP(*_µ_*) ≡ *_µ_~s~*[0]
+
+This has the effect of writing said value to **_µ_**pc. See section link:#9._Execution_Model[9.]
+____
+
+|[#_bookmark148 .anchor]####0x57 a|
+____
+JUMPI
+____
+
+|2 a|
+____
+0
+____
+
+a|
+____
+Conditionally alter the program counter.
+____
+
+|===
+
+__J__JUMPI
+
+(*_µ_*) *__µ__s*[0] if *__µ__s*[1] = 0
+
+____
+**_µ_**pc + 1 otherwise
+
+This has the effect of writing said value to **_µ_**pc. See section link:#9._Execution_Model[9.]
+
+0x58 PC 0 1 Get the value of the program counter _prior_ to the increment corresponding to this instruction.
+
+*__µ__s*[0] ≡ **_µ_**pc
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 35
+
+0x59 MSIZE 0 1 Get the size of active memory in bytes.
+
+*__µ__s*[0] ≡ 32**_µ_**i
+
+0x5a GAS 0 1 Get the amount of available gas, including the corresponding reduction for the cost of this instruction.
+
+*__µ__s*[0] ≡ **_µ_**g
+
+0x5b JUMPDEST 0 0 Mark a valid destination for jumps.
+
+This operation has no effect on machine state during execution.
+____
+
+== 60s & 70s: Push Operations Value Mnemonic _δ α_ Description
+
+____
+0x60 PUSH1 0 1 Place 1 byte item on stack.
+
+*_µ_* *s*[0] ≡ _c_(**_µ_**pc +f1)
+____
+
+[width="100%",cols="9%,10%,81%",options="header",]
+|===
+| | a|
+____
+The bytes are read in line from the program code’s bytes array.
+
+The function _c_ ensures the bytes default to zero if they extend past the limits. The byte is right-aligned (takes the lowest significant place in big endian).
+____
+
+a|
+____
+0x61
+____
+
+a|
+____
+PUSH2
+____
+
+a|
+____
+0 1 Place 2-byte item on stack.
+____
+
+|===
+
+____
+. . .
+
+*__µ__s*[0] ≡ *_c_* (**_µ_**pc + 1) _. . ._ (**_µ_**pc + 2)
+
+with *_c_*(*_x_*) ≡ (_c_(*_x_*~0~)_, ..., c_(_*x* ~x ~_~−1~)) with _c_ as defined as above.
+
+The bytes are right-aligned (takes the lowest significant place in big endian).
+
+. .
+
+0x7f PUSH32 0 1 Place 32-byte (full word) item on stack.
+
+*__µ__s*[0] ≡ *_c_* (**_µ_**pc + 1) _. . ._ (**_µ_**pc + 32) where *_c_* is defined as above.
+
+The bytes are right-aligned (takes the lowest significant place in big endian).
+____
+
+== 80s: Duplication Operations
+
+[width="100%",cols="16%,24%,7%,7%,46%",options="header",]
+|===
+|*Value* a|
+____
+*Mnemonic*
+____
+
+a|
+____
+_δ_
+____
+
+|_α_ a|
+____
+*Description*
+____
+
+|0x80 a|
+____
+DUP1
+____
+
+a|
+____
+1
+____
+
+|2 a|
+____
+Duplicate 1st stack item.
+____
+
+|0x81 a|
+____
+DUP2
+____
+
+a|
+____
+2
+____
+
+|3 a|
+____
+*__µ__s*[0] ≡ *__µ__s*[0]
+
+Duplicate 2nd stack item.
+____
+
+| | | | a|
+____
+*__µ__s*[0] ≡ *__µ__s*[1]
+____
+
+|===
+
+____
+. . . . .
+
+0x8f DUP16 16 17 Duplicate 16th stack item.
+
+*__µ__s*[0] ≡ *__µ__s*[15]
+____
+
+== 90s: Exchange Operations
+
+[width="100%",cols="14%,21%,6%,6%,53%",options="header",]
+|===
+|*Value* a|
+____
+*Mnemonic*
+____
+
+a|
+____
+_δ_
+____
+
+|_α_ a|
+____
+*Description*
+____
+
+|0x90 a|
+____
+SWAP1
+____
+
+a|
+____
+2
+____
+
+|2 a|
+____
+Exchange 1st and 2nd stack items.
+
+*__µ__s*[0] ≡ *__µ__s*[1]
+
+*__µ__s*[1] ≡ *__µ__s*[0]
+____
+
+|0x91 a|
+____
+SWAP2
+____
+
+a|
+____
+3
+____
+
+|3 a|
+____
+Exchange 1st and 3rd stack items.
+____
+
+|===
+
+____
+. . .
+
+*__µ__s*[0] ≡ *__µ__s*[2]
+
+*__µ__s*[2] ≡ *__µ__s*[0]
+
+. .
+
+0x9f SWAP16 17 17 Exchange 1st and 17th stack items.
+
+*__µ__s*[0] ≡ *__µ__s*[16]
+
+*__µ__s*[16] ≡ *__µ__s*[0]
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 36
+____
+
+== a0s: Logging Operations
+
+____
+For all logging operations, the state change is to append an additional log entry on to the substate’s log series:
+
+_A_*l* ≡ _A_*~l~* · (_I_~a~_,_ *t*_, *µ*_*m*[*__µ__s*[0] _. . ._ (*__µ__s*[0] + *__µ__s*[1] − 1)]) and to update the memory consumption counter: **_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[0]_, *µ*_*s*[1])
+
+The entry’s topic series, *t*, differs accordingly:
+____
+
+[width="100%",cols="12%,16%,3%,4%,65%",options="header",]
+|===
+|*Value* a|
+____
+*Mnemonic*
+____
+
+|_δ_ |_α_ a|
+____
+*Description*
+____
+
+|0xa0 a|
+____
+LOG0
+____
+
+a|
+____
+2
+____
+
+|0 a|
+____
+Append log record with no topics.
+____
+
+|0xa1 a|
+____
+LOG1
+____
+
+a|
+____
+3
+____
+
+|0 a|
+____
+*t* ≡ ()
+
+Append log record with one topic.
+____
+
+| | | | a|
+____
+*t* ≡ (*__µ__s*[2])
+____
+
+|===
+
+____
+. . . . .
+
+0xa4 LOG4 6 0 Append log record with four topics.
+
+*t* ≡ (*__µ__s*[2]_, *µ*_*s*[3]_, *µ*_*s*[4]_, *µ*_*s*[5])
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 37
+____
+
+== f0s: System operations
+
+____
+*Value Mnemonic* _δ α_ *Description*
+
+0xf0 CREATE 3 1 Create a new account with associated code.
+
+*i* ≡ *__µ__m*[*__µ__s*[1] _. . ._ (*__µ__s*[1] + *__µ__s*[2] − 1)]
+
+link:#_bookmark43[_ζ_] ≡ ∅
+
+(__*σ* , *µ*__g__, A , z,__ *o*) ≡
+
+link:#_bookmark44[Λ(]*_σ_*^∗^_, A, I_~a~_, I_~o~_, L_(**_µ_**g)_, I_~p~_, *µ*_*s*[0]_,_ *i*_, I_~e~ + 1__, ζ, I__~w~) if *__µ__s*[0] *_σ_*[_I_~a~]~b~
+
+ __*σ*, *µ*__g__, A,__ 0__,__ () otherwise
+
+*_σ_*^∗^ ≡ *_σ_* except *_σ_*^∗^[__I__a]n = *_σ_*[__I__a]n + 1
+
+*__µ__s*[0] ≡ _x_
+
+where _x_ = 0 if _z_ = 0, i.e., the link:#_bookmark48[contract creation process failed,] or __I__e = 1024
+
+(the maximum call depth limit is reached) or *__µ__s*[0] _> *σ*_[_I_~a~]~b~ (balance of the caller is too low to fulfil the value transfer); and otherwise _x_ = ADDR(__I__a__, *σ*__[__I__a]n__, ζ,__ *i*), the address of the newly created account link:#_bookmark45[(86).]
+
+**_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[1]_, *µ*_*s*[2])
+
+*__µ__o* ≡ ()
+
+Thus the operand order is: value, input offset, input size.
+____
+
+0xf1 CALL 7 1 Message-call into an account.
+
+(_*σ* , g , A , x,_ *o*) ≡
+
+____
+link:#_bookmark47[Θ(]__*σ*, A , I__a__, I__o__, t, t, C__CALLGAS(_*σ*, *µ*, A_)_,_
+
+__I__p__, *µ*__*~s~*[2]_, *µ*_*~s~*[2]_,_ *i*__, I__e + 1__, I__w)
+
+if *__µ__s*[2] *_σ_*[_I_~a~]~b~ ∧
+
+__I__e _<_ 1024
+
+(_*σ*, g, A,_ 0__,__ ()) otherwise
+
+_n_ ≡ min(\{*__µ__s*[6]_,_ ll**o**ll})
+
+*__µ__m*[*__µ__s*[5] _. . ._ (*__µ__s*[5] + _n_ − 1)] = *o*[0 _. . ._ (_n_ − 1)]
+
+*__µ__o* = *o*
+
+**_µ_**g ≡ **_µ_**g + _g_
+
+*__µ__s*[0] ≡ _x_
+
+_A_^∗^ ≡ _A_ except _A_^∗^*~a~* ≡ _A_*~a~* ∪ \{_t_}
+
+_t_ ≡ *_µ_* [1] mod 2^160^
+
+**_µ_**i ≡ _M_ (_M_ (**_µ_**i__, *µ*__*s*[3]_, *µ*_*s*[4])_, *µ*_*s*[5]_, *µ*_*s*[6])
+
+where _x_ = 0 if the link:#_bookmark50[code execution for this operation failed,] or if
+
+*__µ__s*[2] _> *σ*_[_I_~a~]~b~ (not enough funds) or _I_~e~ = 1024 (call depth limit reached); _x_ = 1 otherwise.
+
+Thus the operand order is: gas, to, value, in offset, in size, out offset, out size.
+
+__C__CALL(_*σ*, *µ*, A_) ≡ __C__GAfSCAP(_*σ*, *µ*, A_) + __C__EXTRA(_*σ*, *µ*, A_)
+____
+
+__C__GASCAP
+
+(_*σ*, *µ*, A_) min\{link:#_bookmark141[_L_](*_µ_*~g~ − __C__EXTRA(_*σ*, *µ*, A_))_, *µ*_*~s~*[0]} if *_µ_*~g~ ≥ __C__EXTRA(_*σ*, *µ*, A_)
+
+____
+*__µ__s*[0] otherwise
+
+__C__EXTRA(__*σ*, *µ*__f__, A__) ≡ link:#_bookmark140[__C__aaccess](_t, A_) + __C__XFER(*_µ_*) + __C__NEW(_*σ*, *µ*_)
+____
+
+__C__NEW
+
+(_*σ*, *µ*_) __G__newaccount if DEAD(_*σ*, t_) ∧ *_µ_~s~*[2] 0
+
+____
+0 otherwise
+
+0xf2 CALLCODE 7 1 Message-call into this account with an alternative account’s code.
+
+Exactly equivalent to CALL except:
+____
+
+(_*σ* , g , A , x,_ *o*) ≡
+
+____
+Θ(_*σ*, A_^∗^__, I__a__, I__o__, I__a__, t, C__CALLGAS(*_µ_*)_,_
+
+__I__p__, *µ*__*~s~*[2]_, *µ*_*~s~*[2]_,_ *i*__, I__e + 1__, I__w)
+
+if *__µ__s*[2] *_σ_*[_I_~a~]~b~ ∧
+
+__I__e _<_ 1024
+
+(_*σ*, g, A,_ 0__,__ ()) otherwise
+
+Note the change in the fourth parameter to the call link:#_bookmark47[Θ] from the 2nd stack value *_µ_~s~*[1] (as in CALL) to the present address __I__a. This means that the recipient is in fact the same account as at present, simply that the code is overwritten.
+
+[#_bookmark149 .anchor]####0xf3 RETURN 2 0 Halt execution returning output data.
+
+__H__RETURN(*_µ_*) ≡ *_µ_~m~*[*_µ_~s~*[0] _. . ._ (*_µ_~s~*[0] + *_µ_~s~*[1] − 1)]
+
+This has the effect of halting the execution at this point with output defined.
+
+See section link:#9._Execution_Model[9.]
+
+**_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[0]_, *µ*_*s*[1])
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 38
+____
+
+0xf4 DELEGATECALL 6 1 Message-call into this account with an alternative account’s code, but
+
+____
+persisting the current values for _sender_ and _value_.
+
+Compared with CALL, DELEGATECALL takes one fewer arguments. The omitted argument is *__µ__s*[2]. As a result, *__µ__s*[3], *__µ__s*[4], *__µ__s*[5] and *__µ__s*[6] in the definition of CALL should respectively be replaced with *__µ__s*[2], *__µ__s*[3], *__µ__s*[4] and *__µ__s*[5]. Otherwise it is equivalent to CALL except:
+
+ Θ(_*σ*, A_^∗^__, I__s__, I__o__, I__a__, t, C__CALLGAS(*_µ_*)_,_
+
+if _I_
+
+_<_ 1024
+
+(_*σ*, g, A,_ 0__,__ ()) otherwise
+
+Note the changes (in addition to that of the fourth parameter) to the second and ninth parameters to the call link:#_bookmark47[Θ.]
+
+This means that the recipient is in fact the same account as at present, simply that the code is overwritten _and_ the context is almost entirely identical.
+____
+
+[width="100%",cols="8%,16%,3%,73%",options="header",]
+|===
+a|
+____
+[#_bookmark150 .anchor]####0xf5
+____
+
+a|
+____
+CREATE2
+____
+
+a|
+____
+4
+____
+
+a|
+____
+1 Create a new account with associated code. Exactly equivalent to CREATE except:
+
+The salt _ζ_ ≡ *__µ__s*[3].
+____
+
+a|
+____
+0xfa
+____
+
+a|
+____
+STATICCALL
+____
+
+a|
+____
+6
+____
+
+a|
+____
+1 Static message-call into an account. Exactly equivalent to CALL except:
+
+The argument *__µ__s*[2] is replaced with 0.
+
+The deeper argument *__µ__s*[3], *__µ__s*[4], *__µ__s*[5] and *__µ__s*[6] are respectively replaced with *__µ__s*[2], *__µ__s*[3], *__µ__s*[4] and *__µ__s*[5].
+
+The last argument of link:#_bookmark47[Θ] is ⊥.
+____
+
+a|
+____
+[#_bookmark151 .anchor]####0xfd
+____
+
+a|
+____
+REVERT
+____
+
+a|
+____
+2
+____
+
+a|
+____
+0 Halt execution reverting state changes but returning data and remaining gas. The effect of this operation is described in link:#_bookmark55[(143).]
+
+For the gas calculation, we use the memory expansion function,
+
+**_µ_**i ≡ _M_ (**_µ_**i__, *µ*__*s*[0]_, *µ*_*s*[1])
+____
+
+a|
+____
+0xfe
+____
+
+a|
+____
+INVALID
+____
+
+a|
+____
+∅
+____
+
+a|
+____
+∅ Designated invalid instruction.
+____
+
+a|
+____
+[#_bookmark152 .anchor]####0xff
+____
+
+a|
+____
+SELFDESTRUCT
+____
+
+a|
+____
+1
+____
+
+a|
+____
+0 Halt execution and register account for later deletion.
+____
+
+|===
+
+____
+_A_*~s~* ≡ _A_*~s~* ∪ \{_I_~a~}
+
+_A_*~a~* ≡ _A_*~a~* ∪ \{_r_}
+____
+
+*_σ_* [_r_] ≡
+
+____
+(*_σ_*[_r_]~n~_, *σ*_[_r_]~b~ + *_σ_*[_I_~a~]~b~_, *σ*_[_r_]*~s~*_, *σ*_[_r_]~c~) if _r_ = _I_~a~
+
+(*_σ_*[_r_]n__,__ 0__, *σ*__[_r_]*s*_, *σ*_[_r_]c) otherwise
+
+where _r_ = *_µ_* [0] mod 2^160^
+
+*_σ_* [_I_~a~]~b~ = 0
+
+__C__SELFDESTRUCT
+____
+
+(_*σ*, *µ*_) ≡ _G_
+
+selfdestruct
+
+____
++ 0 if _r_ ∈ link:#_bookmark39[_A_*a*]
+
+__G__coldaccountaccess otherwise
+
++ _G_~newaccount~ if DEAD(_*σ*, r_) ∧ *_σ_*[_I_~a~]~b~ = 0
+
+0 otherwise
+
+Appendix I. Genesis Block
+
+[#_bookmark153 .anchor]####The genesis block is 15 items, and is specified thus:
+
+{empty}(331) 0256__,__ KEC RLP () _,_ 0160__, stateRoot,__ 0__,__ 0__,__ 02048__,__ 234__,__ 0__,__ 0__,__ 3141592__, time,__ 0__,__ 0256__,__ KEC (42) _,_ ()_,_ ()
+
+Where 0256 refers to the parent hash, a 256-bit hash which is all zeroes; 0160 refers to the beneficiary address, a 160-bit hash which is all zeroes; 02048 refers to the log bloom, 2048-bit of all zeros; 2^34^ refers to the difficulty; the transaction trie root, receipt trie root, gas used, block number and extradata are both 0, being equivalent to the empty byte array. The sequences of both ommers and transactions are empty and represented by (). KEC (42) refe rs to th e Keccak-256 hash of
+
+The proof-of-concept series include a development premine, making the state root hash some value _stateRoot_. Also _time_ will be set to the initial timestamp of the genesis block. The latest documentation should be consulted for those values.
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 39
+
+[#Appendix_J._Ethash .anchor]####Appendix J. Ethash
+____
+
+[arabic]
+. *Definitions.* We employ the following definitions: Name Value Description
+
+____
+_J_~wordbytes~ 4 Bytes in word.
+
+[#_bookmark156 .anchor]##_J_~datasetinit~ 2^30^ Bytes in dataset at genesis. _J_~datasetgrowth~ 2^23^ Dataset growth per epoch. [#_bookmark155 .anchor]##_J_~cacheinit~ 2^24^ Bytes in cache at genesis. _J_~cachegrowth~ 2^17^ Cache growth per epoch.
+____
+
+[width="100%",cols="21%,13%,66%",options="header",]
+|===
+a|
+____
+[#_bookmark157 .anchor]##__J__epoch
+____
+
+a|
+____
+30000
+____
+
+a|
+____
+Blocks per epoch.
+____
+
+a|
+____
+__J__mixbytes
+____
+
+a|
+____
+128
+____
+
+a|
+____
+mix length in bytes.
+____
+
+a|
+____
+__J__hashbytes
+____
+
+a|
+____
+64
+____
+
+a|
+____
+Hash length in bytes.
+____
+
+a|
+____
+__J__parents
+____
+
+a|
+____
+256
+____
+
+a|
+____
+Number of parents of each dataset element.
+____
+
+a|
+____
+__J__cacherounds
+____
+
+a|
+____
+3
+____
+
+a|
+____
+Number of rounds in cache production.
+____
+
+a|
+____
+__J__accesses
+____
+
+a|
+____
+64
+____
+
+a|
+____
+Number of accesses in hashimoto loop.
+____
+
+|===
+
+[arabic, start=2]
+. *Size of dataset and cache.* The size for Ethash’s cache *c* ∈ B and dataset *d* ∈ B depend on the epoch, which in turn depends on the block number.
+
+____
+{empty}(332) _E_ (_H_ ) = +++__H__i+++
+
+The size of the dataset growth by _J_~datasetgrowth~ bytes, and the size of the cache by _J_~cachegrowth~ bytes, every epoch. In order to avoid regularity leading to cyclic behavior, the size must be a prime number. Therefore the size is reduced by a multiple of _J_~mixbytes~, for the dataset, and _J_~hashbytes~ for the cache. Let _d_~size~ = ll**d**ll be the size of the dataset. Which is calculated using
+____
+
+[arabic, start=333]
+. __d__size = __E__prime(__J__datasetinit + __J__datasetgrowth · __E__epoch − __J__mixbytes__, J__mixbytes)
+
+____
+The size of the cache, __c__size, is calculated using
+____
+
+[arabic, start=334]
+. __c__size = __E__prime(__J__cacheinit + __J__cachegrowth · __E__epoch − __J__hashbytes__, J__hashbytes)
+. _E_
+
+prime
+
+(_x, y_) = _x_ if _x/y_ ∈ N
+
+____
+__E__prime(_x_ − 2 · _y, y_) otherwise
+____
+
+[arabic]
+. *Dataset generation.* In order to generate the dataset we need the cache *c*, which is an array of bytes. It depends on the cache size __c__size and the seed hash *s* ∈ B32.
+[arabic]
+.. _Seed hash._ The seed hash is different for every epoch. For the first epoch it is the Keccak-256 hash of a series of 32 bytes of zeros. For every other epoch it is always the Keccak-256 hash of the previous seed hash:
+
+[arabic, start=336]
+. *s* = _C_~seedhash~(_H_~i~)
+. __C__seedhash
+
+(_H_ ) = f**0**~32~ if _E_~epoch~(_H_~i~) = 0
+
+____
+With **0**32 being 32 bytes of zeros.
+
+KEC(_C_~seedhash~(_H_~i~ − _J_~epoch~)) otherwise
+____
+
+[arabic]
+. _Cache._ The cache production process involves using the seed hash to first sequentially filling up __c__size bytes of memory, then performing _J_~cacherounds~ passes of the RandMemoHash algorithm created by link:#_bookmark85[Lerner [2014]]. The initial cache *c* , being an array of arrays of single bytes, will be constructed as follows.
+
+____
+We define the array *c*_i_, consisting of 64 single bytes, as the __i__th element of the initial cache:
+____
+
+[arabic, start=338]
+. *c*_i_
+
+____
+Therefore *c* can be defined as
+____
+
+= KEC512(*s*) if _i_ = 0
+
+KEC512(*c*__i__−1) otherwise
+
+[arabic, start=339]
+. *c* [_i_] = *c*_i_ ∀ _i < n_
+. _n_ = +++__c__size+++
+
+____
+__J__hashbytes
+
+The cache is calculated by performing _J_~cacherounds~ rounds of the RandMemoHash algorithm to the initial cache *c* :
+____
+
+[arabic, start=341]
+. *c* = __E__cacherounds(*c* __, J__cacherounds)
+. _E_~cacherounds~(*x*_, y_) =
+
+____
+__E__RMH(*x*) if _y_ = 1
+
+__E__~cacherounds~(_E_~RMH~(*x*)_, y_ − 1) otherwise
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 40
+
+Where a single round modifies each subset of the cache as follows:
+
+{empty}(343) _E_~RMH~(*x*) = _E_~rmh~(*x*_,_ 0)_, E_~rmh~(*x*_,_ 1)_, , E_~rmh~(*x*_, n_ − 1)
+
+{empty}(344) _E_~rmh~(*x*_, i_) = KEC512(*x* [(_i_ − 1 + _n_) mod _n_] ⊕ *x* [*x* [_i_][0] mod _n_])
+
+with *x* = *x* except *x* [_j_] = _E_~rmh~(*x*_, j_) ∀ _j < i_
+____
+
+[arabic]
+. [#_bookmark158 .anchor]##_Full dataset calculation._ Essentially, we combine data from __J__parents pseudorandomly selected cache nodes, and hash that to compute the dataset. The entire dataset is then generated by a number of items, each _J_~hashbytes~ bytes in size:
+
+____
+{empty}(345) *d*[_i_] = _E_~datasetitem~(*c*_, i_) ∀ _i <_
+
++++__d__size+++
+
+hashbytes
+
+In order to calculate the single item we use an algorithm inspired by the FNV hash link:#_bookmark97[(Glenn Fowler [1991])] in some cases as a non-associative substitute for XOR.
+
+{empty}(346) _E_ (*x*_,_ *y*) = (*x* · (0x01000193 ⊕ *y*)) mod 2^32^
+
+The single item of the dataset can now be calculated as:
+____
+
+[arabic, start=347]
+. _E_~datasetitem~(*c*_, i_) = _E_~parents~(*c*_, i,_ −1__,__ ∅)
+. _E_
+
+parents
+
+(*c*_, i, p,_ *m*) = __E__parents(*c*_, i, p_ + 1__, E__mix(*m*_,_ *c*_, i, p_ + 1)) if __p < J__parents − 2
+
+____
+__E__mix(*m*_,_ *c*_, i, p_ + 1) otherwise
+
+fKEC512(*c*[_i_ mod __c__size] ⊕ _i_) if _p_ = 0
+____
+
+[arabic]
+. *Proof-of-work function.* Essentially, we maintain a “mix” _J_~mixbytes~ bytes wide, and repeatedly sequentially fetch _J_~mixbytes~ bytes from the full dataset and use the _E_~FNV~ function to combine it with the mix. _J_~mixbytes~ bytes of sequential access are used so that each round of the algorithm always fetches a full page from RAM, minimizing translation lookaside buffer misses which ASICs would theoretically be able to avoid.
+
+____
+If the output of this algorithm is below the desired target, then the nonce is valid. Note that the extra application of KEC at the end ensures that there exists an intermediate nonce which can be provided to prove that at least a small amount of work was done; this quick outer PoW verification can be used for anti-DDoS purposes. It also serves to provide statistical assurance that the result is an unbiased, 256 bit number.
+
+The PoW-function returns an array with the compressed mix as its first item and the Keccak-256 hash of the concatenation of the compressed mix with the seed hash as the second item:
+
+(350)
+
+PoW(__H__n__, H__~n~_,_ *d*) = \{*m*~c~(KEC(RLP(_L_~H~(__H__n)))_, H_~n~_,_ *d*)_,_ KEC(*s*~h~(KEC(RLP(_L_~H~(__H__n)))_, H_~n~) + *m*~c~(KEC(RLP(_L_~H~(__H__n)))_, H_~n~_,_ *d*))}
+
+With __H__n being the hash of the header without the nonce. The compressed mix **m**c is obtained as follows:
+
+__n__mix
+____
+
+[arabic, start=351]
+. *m*~c~(*h*_,_ *n*_,_ *d*) = _E_~compress~(_E_~accesses~(*d*_,_ *s*~h~(*h*_,_ *n*)_,_ *s*~h~(*h*_,_ *n*)_,_ −1)_,_ −4)
+
+____
+__i__=0
+
+The seed hash being:
+____
+
+[arabic, start=352]
+. *s*~h~(*h*_,_ *n*) = KEC512(*h* + _E_~revert~(*n*)) __E__revert(*n*) returns the reverted bytes sequence of the nonce *n*:
+. __E__revert(*n*)[_i_] = *n*[ll**n**ll − _i_]
+
+____
+We note that the “+”-operator between two byte sequences results in the concatenation of both sequences.
+
+The dataset *d* is obtained as described in section link:#_bookmark158[J.3.3.] The number of replicated sequences in the mix is:
+____
+
+[arabic, start=354]
+. _n_
+
+mix
+
+____
+= +++__J__mixbytes+++
+
+hashbytes
+
+In order to add random dataset nodes to the mix, the __E__accesses function is used:
+____
+
+[arabic, start=355]
+. _E_
+
+accesses
+
+(*d*_,_ *m*_,_ *s*_, i_) = __E__mixdataset(*d*_,_ *m*_,_ *s*_, i_) if _i_ = __J__accesses − 2
+
+____
+_E_~accesses~(_E_~mixdataset~(*d*_,_ *m*_,_ *s*_, i_)_,_ *s*_, i_ + 1) otherwise
+____
+
+[arabic, start=356]
+. _E_~mixdataset~(*d*_,_ *m*_,_ *s*_, i_) = _E_~FNV~(*m*_, E_~newdata~(*d*_,_ *m*_,_ *s*_, i_)) _E_~newdata~ returns an array with _n_~mix~ elements:
+. _E_ (*d*_,_ *m*_,_ *s*_, i_)[_j_] = *d*[_E_ (_i_ ⊕ *s*[0]_,_ *m*[_i_ mod +++__J__mixbytes+++ ]) mod +++__d__size__/J__hashbytes+++ · _n_
+
+____
++ _j_] ∀ _j < n_
+
+ETHEREUM: A SECURE DECENTRALISED GENERALISED TRANSACTION LEDGER *BERLIN VERSION* 41
+
+The mix is compressed as follows:
+____
+
+[arabic, start=358]
+. _E_
+
+compress
+
+(*m*_, i_) = *m* if _i_ ;;: ll**m**ll − 8
+
+____
+__E__compress(__E__FNV(__E__FNV(__E__FNV(*m*[_i_ + 4]_,_ *m*[_i_ + 5])_,_ *m*[_i_ + 6])_,_ *m*[_i_ + 7])_, i_ + 8) otherwise
+
+Appendix K. Anomalies on the Main Network
+
+K.1. *Deletion of an Account Despite Out-of-gas.* At block 2675119, in the transaction 0xcf416c536ec1a19ed1fb89e 4ec7ffb3cf73aa413b3aa9b77d60e4fd81a4296ba, an account at address 0x03 was called and an out-of-gas occurred during the call. Against the equation link:#_bookmark120[(207),] this added 0x03 in the set of touched addresses, and this transaction turned *_σ_*[0__x__03] into ∅.
+
+Appendix L. List of mathematical symbols
+
+Symbol Latex Command Description
+
+\bigvee This is the least upper bound, supremum, or join of all elements operated on. Thus it is the greatest element of such elements link:#_bookmark88[(Davey and Priestley [2002]]).
+____
